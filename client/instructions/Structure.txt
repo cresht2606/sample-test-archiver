@@ -55,10 +55,9 @@ Features:
 + Sample Test Filters (X)
 + Search Bar (X)
 + Google Drive Embedded (X)
-+ Update Catalogue
++ Changelog Section: Scroll Feature or Read More feature (Update Catalogue)
 + Adds To Favourite Button & Favourite Lists - Cookies / localStorage (Save the favorite tests)
 + Viewer Track
-+ Changelog Section: Scroll Feature or Read More feature
 - Optional Feature: Feedback System
 
 ====================== IMPROVEMENTS ======================
@@ -75,5 +74,46 @@ Features:
 Frontend (HTML + CSS + JS) <--> ExpressJS Backend <--> SQL Database
 
 ====================== PROJECT STRUCTURE OVERVIEW ======================
+sample-test-archiver-main/
+│
+├─ client/                         # Front-end (static web client)
+│  │
+│  ├─ assets/                      # Public static resources
+│  │  ├─ js/                       # Client-side functionality
+│  │  │  ├─ main.js                # Main UI logic + search + filtering
+│  │  │  ├─ api.js                 # API functions for backend requests
+│  │  │  └─ utils.js               # Helper utilities (DOM functions, caching,...)
+│  │  │
+│  │  └─ styles/
+│  │     └─ main.css               # Custom CSS styling
+│  │
+│  ├─ backups/                     # Old + fallback front-end layouts (optional)
+│  │
+│  ├─ instructions/                # Documentation / guidance for contributors
+│  │
+│  ├─ 404.html                     # Custom error page for invalid routes
+│  ├─ changelog.html               # UI to display change logs
+│  └─ index.html                   # Main home page (Search + Filters + Cards)
+│
+├─ db/                             # SQL scripts for database creation
+│  ├─ create_tables.sql            # DB creation script version 1
+│  └─ create_tables_2.sql          # Updated DB structure version 2
+│
+├─ server/                         # Backend server (Node.js + Express)
+│  │
+│  ├─ routes/                      # REST API endpoints
+│  │  ├─ changelog.js              # GET change logs endpoint
+│  │  ├─ subjects.js               # GET subject list endpoint
+│  │  └─ tests.js                  # GET/search/filter tests endpoint
+│  │
+│  ├─ utils/
+│  │  └─ db.js                     # Database connection + query helpers (PostgreSQL)
+│  │
+│  └─ server.js                    # Entry point for Express server
+│
+├─ node_modules/                   # Auto-generated dependencies (excluded in Git)
+│
+├─ package.json                    # Dependencies + scripts
+└─ package-lock.json               # Locked dependency versions checksum
 
 
