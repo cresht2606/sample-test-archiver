@@ -1,0 +1,79 @@
+Title: Sample Test Archiver | LaTeX-compiled Inventory | Mathtoolkit Repository Revision
+
+Layout Website (Front-end):
+- Core Technologies: HTML, CSS, Vanilla JavaScript
+- Additional Frameworks: Bootstrap (CSS)
+- Layout Structure: Header (Navigation Bar), Body and Footer
+
+Logical Website (Back-end):
+- Core Technologies: JavaScript, SQL
+- Additional Frameworks: Node.js & Express.js
+
+Back-end Workflow
+
+1. Users are required to use search bar to find the appropriate sample tests: By typing the name (AutoComplete), it will show up the dropdown selection
+
+Example:
++ Calculus
++ Linear Algebra
++ Probability
++ And so on
+
+2. Once selecting the following sections, users need to select respective sections: University, Year, Semester and Type. There are some cases:
++ There's only one-test → Automatically filters out
++ There's only one university, but multiple choices in remaining sections
++ There are multiple universities, and multiple choices in remaining sections
+
+3. After filtering out the appropriate sections, a Google Drive embedded link (viewer) is shown up below the search and section bars.
+
+- Extras:
++ Google Drive embed (iframe)
++ localStorage (client-side)
++ REST API JSON
+
+Features:
+====================== MAIN PAGE ====================== 
+1. Add to favourite button: If user find this sample test useful, they click this button, the test will be saved to the Favourite Test section (By saving the title, which refers to the sample test location). I assume this being done by cookies as it would save the preferences. If they find no longer useful, they could exclude particular test by X button on the right of that section
+
+2.  Views button: Keep track of the users watching particular tests (each)
+
+====================== CHANGELOG PAGE ====================== 
+1. Bootstrap (Changelog section)
+2. Pagination with previous, next buttons and directional pages
+
+====================== FEEDBACK ======================
+- Dialog box with href buttons
+
+====================== ABOUT ======================
+- Refers to the biography website
+
+====================== CHECKLIST ======================
+- UI Polishments (X)
+- Redefine footer position (X)
+- Back-end:
++ Database Connection (MySQL) (X)
++ Sample Test Filters (X)
++ Search Bar (X)
++ Google Drive Embedded (X)
++ Update Catalogue
++ Adds To Favourite Button & Favourite Lists - Cookies / localStorage (Save the favorite tests)
++ Viewer Track
++ Changelog Section: Scroll Feature or Read More feature
+- Optional Feature: Feedback System
+
+====================== IMPROVEMENTS ======================
+- When starting up the website, it will automatically pop up the list of subjects (name + code). (X)
+- Logical handling: Clicking outside and inside of the dropdown - subsequentially turning off the dropdown, After removing keywords on the search bar while being selected - It will automatically clear the filters and google drive frames. (X)
+- Remove the iframe placeholder by default, i.e only display actual google drive frames. (X)
+- Remove redundant element (University, Year, Semester, Type) in respective dropdowns (X)
+- Brand new logo of the website.
+- Visual aids: proper display of selection on search bar (X) and responsive allocation during function
+- Revamped footer display (accommodate standard principles).
+- Minor effects on interaction towards Favourite list.
+
+====================== ARCHITECTURE OVERVIEW ======================
+Frontend (HTML + CSS + JS) <--> ExpressJS Backend <--> SQL Database
+
+====================== PROJECT STRUCTURE OVERVIEW ======================
+
+

@@ -1,0 +1,174 @@
+/* =========================================================
+   SAMPLE TEST ARCHIVER - MAIN STYLESHEET (COMPACT VERSION)
+   ========================================================= */
+
+/* THEME VARIABLES */
+:root {
+    --bg: #171616;
+    /* dark page background */
+    --card: #ffffff;
+    /* main card color */
+    --muted: #6c6c6c;
+    --accent: #e53935;
+    /* red view button */
+    --panel-radius: 12px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --soft-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* GLOBAL STRUCTURE */
+html,
+body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: #111;
+    font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* HEADER */
+.site-header {
+    background: var(--bg);
+}
+
+.site-header .brand {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.15rem;
+}
+
+.site-header .nav-link {
+    color: #fff;
+    opacity: 0.9;
+    margin-left: 0.75rem;
+}
+
+/* PAGE TITLE */
+.page-title-wrap {
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.page-title {
+    display: inline-block;
+    background: var(--card);
+    padding: 0.4rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: var(--soft-shadow);
+}
+
+/* PANEL BASE */
+.panel {
+    background: transparent;
+}
+
+/* MAIN PANEL - COMPACT STYLE */
+.main-panel {
+    background: var(--card);
+    border-radius: var(--panel-radius);
+    padding: 0.75rem 1rem;
+    /* reduced padding */
+    box-shadow: var(--shadow);
+    color: #222;
+    max-width: 800px;
+    /* narrower layout */
+    margin: 1rem auto;
+}
+
+/* SEARCH + FILTERS */
+.search-wrap .form-control {
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+.filters .form-select {
+    border-radius: 999px;
+    min-width: 120px;
+    background-color: #fff;
+}
+
+/* Consistent alignment */
+.autocomplete-list {
+    width: 100%;
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.d-flex.justify-content-center.gap-2.align-items-center.mb-3 {
+    margin-top: 7rem;
+    /* pushes the buttons down */
+}
+
+/* EMBED PLACEHOLDER */
+.embed-placeholder {
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: #fbfbfb;
+    border: 1px solid #eee;
+    min-height: 160px;
+    /* reduced height */
+}
+
+/* ACTION BUTTONS */
+#viewsBtn {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    border-radius: 999px;
+}
+
+#favBtn {
+    background: #222;
+    color: #fff;
+    border-radius: 999px;
+}
+
+/* FAVOURITES CARD */
+.fav-card {
+    background: #f4f8ff;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 0.75rem;
+}
+
+/* FOOTER */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--bg);
+    color: #fff;
+    margin-top: auto;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+.site-footer .panel {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    color: #fff;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 991px) {
+    .main-panel {
+        padding: 0.75rem;
+        max-width: 95%;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        padding: 0.3rem 0.8rem;
+    }
+}
