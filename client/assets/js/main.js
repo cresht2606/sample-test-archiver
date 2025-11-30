@@ -20,6 +20,7 @@ const viewsCountSpan = document.getElementById('viewsCount');
 
 let selectedSubjectId = null;
 let selectedTest = null;
+let favourites = JSON.parse(localStorage.getItem("favourites") || "[]"); // Favorite Storage 
 
 // ---------- Favourites Placeholder ----------
 function renderFavouritesPlaceholder() {
@@ -31,7 +32,16 @@ renderFavouritesPlaceholder();
 
 if (favBtn) {
     favBtn.addEventListener('click', () => {
-        alert("⭐ Favorites feature will be available soon!");
+        if (!selectedTest) {
+            alert("Select a test first!");
+            return;
+        }
+        // If already in favorite => do nothing
+        if (!favourites.includes(selectedTest.id)) {
+            favourites.push(selectedTest.id);
+            localStorage.setItem("favourites", JSON.stringify(favourites));
+            renderFavourites();
+        }
     });
 }
 
@@ -120,6 +130,8 @@ function populateDropdowns(filters) {
 window.addEventListener("DOMContentLoaded", async () => {
     const list = await fetch('/api/subjects/all').then(r => r.json());
     showAutocomplete(list);
+    //Load favorites from localStorage into UI
+    renderFavourites();
 });
 
 // ---------- Event Listeners for Sequential Dropdowns ----------
@@ -200,15 +212,60 @@ document.addEventListener('click', (e) => {
 // ---------- Load Test Viewer ----------
 function loadTest(test) {
     selectedTest = test;
+// --- View counter in local storage ---
 
+let views = JSON.parse(localStorage.getItem("testViews") || "{}");
+// No view count yet => set to 0 first
+if (!views[test.id]) {
+    views[test.id] = 0;
+}
+//increment of view count
+views[test.id]++;
+//save back
+localStorage.setItem("testViews", JSON.stringify(views));
+//update UI count
+if (viewsCountSpan) {
+    viewsCountSpan.textContent = views[test.id];
+}
+
+//Render Favorites Panel
+async function renderFavourites() {
+    if (!favList) return;
+    if (favourites.length === 0) {
+        favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
+        return;
+    }
+    favList.innerHTML = "";
+    //Loop Favorite
+    for (const id of favourites) {
+        const test = await fetchTestById(id);
+        const div = document.createElement('div');
+        div.className = 'fav-item mb-2 p-2 border rounded';
+        div.innerHTML = `
+            <b>${test.title}</b><br>
+            <small>${test.university} — ${test.year} Semester ${test.semester}</small>
+            <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
+            Remove</button>`;
+        div.addEventListener("click", () => loadTest(test));
+        favList.appendChild(div);
+    }
+    //Remove button listeners
+    document.querySelectorAll(".remove-fav").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = Number(btn.dataset.id);
+            favourites = favourites.filter(f => f !== id);
+            localStorage.setItem("favourites", JSON.stringify(favourites));
+            renderFavourites();
+        });
+    });
+}
+
+//--- load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
       <iframe src="${test.drive_embed_url}" width="640" height="480" allowfullscreen></iframe>
     </div>`;
-
-    if (viewsCountSpan) {
-        viewsCountSpan.textContent = '👁 Feature coming soon';
-    }
 }
 
 // Reset filters and viewer
