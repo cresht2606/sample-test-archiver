@@ -20,15 +20,62 @@ const viewsCountSpan = document.getElementById('viewsCount');
 
 let selectedSubjectId = null;
 let selectedTest = null;
-let favourites = JSON.parse(localStorage.getItem("favourites") || "[]"); // Favorite Storage 
+let favourites = JSON.parse(localStorage.getItem("favourites") || "[]"); // Favourite Storage
 
+function updateFavButton() {
+    if (!selectedTest) {
+        favBtn.textContent = "☆ Add to favourite";
+        return;
+    }
+    if (favourites.includes(selectedTest.id)) {
+        favBtn.textContent = "★ Favourited";
+    }
+    else {
+        favBtn.textContent = "☆ Add to favourite";
+    }
+}
 // ---------- Favourites Placeholder ----------
 function renderFavouritesPlaceholder() {
     if (favList) {
-        favList.innerHTML = '<small class="text-muted"> Favorites feature coming soon ... </small>';
+        favList.innerHTML = '<small class="text-muted"> Favourites feature coming soon ... </small>';
     }
 }
 renderFavouritesPlaceholder();
+
+//Render Favourites Panel
+async function renderFavourites() {
+    if (!favList) return;
+    if (favourites.length === 0) {
+        favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
+        return;
+    }
+    favList.innerHTML = "";
+    //Loop Favourite
+    for (const id of favourites) {
+        const test = await fetchTestById(id);
+        const div = document.createElement('div');
+        div.className = 'fav-item mb-2 p-2 border rounded';
+        div.innerHTML = `
+            <b>${test.title}</b><br>
+            <small>${test.university} — ${test.year} Semester ${test.semester}</small>
+            <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
+            Remove</button>`;
+            //click to load test
+        div.addEventListener("click", () => loadTest(test));
+        favList.appendChild(div);
+    }
+    //Remove button listeners
+    document.querySelectorAll(".remove-fav").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = Number(btn.dataset.id);
+            favourites = favourites.filter(f => f !== id);
+            localStorage.setItem("favourites", JSON.stringify(favourites));
+            renderFavourites();
+            updateFavButton();
+        });
+    });
+}
 
 if (favBtn) {
     favBtn.addEventListener('click', () => {
@@ -36,12 +83,19 @@ if (favBtn) {
             alert("Select a test first!");
             return;
         }
-        // If already in favorite => do nothing
-        if (!favourites.includes(selectedTest.id)) {
-            favourites.push(selectedTest.id);
-            localStorage.setItem("favourites", JSON.stringify(favourites));
-            renderFavourites();
+        const id = selectedTest.id;
+        // If already in favourite => do nothing
+        if (favourites.includes(id)) {
+            //Unfavourite
+            favourites = favourites.filter(f => f !== id);
         }
+        else {
+            //Favourite
+            favourites.push(id);
+        }
+        localStorage.setItem("favourites", JSON.stringify(favourites));
+        updateFavButton();
+        renderFavourites();
     });
 }
 
@@ -125,14 +179,6 @@ function populateDropdowns(filters) {
     // Store filters in dataset for use in event handlers
     selUniversity.dataset.filters = JSON.stringify(filters);
 }
-
-// Automatically load the subject list
-window.addEventListener("DOMContentLoaded", async () => {
-    const list = await fetch('/api/subjects/all').then(r => r.json());
-    showAutocomplete(list);
-    //Load favorites from localStorage into UI
-    renderFavourites();
-});
 
 // ---------- Event Listeners for Sequential Dropdowns ----------
 // These are attached only once
@@ -228,39 +274,6 @@ if (viewsCountSpan) {
     viewsCountSpan.textContent = views[test.id];
 }
 
-//Render Favorites Panel
-async function renderFavourites() {
-    if (!favList) return;
-    if (favourites.length === 0) {
-        favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
-        return;
-    }
-    favList.innerHTML = "";
-    //Loop Favorite
-    for (const id of favourites) {
-        const test = await fetchTestById(id);
-        const div = document.createElement('div');
-        div.className = 'fav-item mb-2 p-2 border rounded';
-        div.innerHTML = `
-            <b>${test.title}</b><br>
-            <small>${test.university} — ${test.year} Semester ${test.semester}</small>
-            <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
-            Remove</button>`;
-        div.addEventListener("click", () => loadTest(test));
-        favList.appendChild(div);
-    }
-    //Remove button listeners
-    document.querySelectorAll(".remove-fav").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const id = Number(btn.dataset.id);
-            favourites = favourites.filter(f => f !== id);
-            localStorage.setItem("favourites", JSON.stringify(favourites));
-            renderFavourites();
-        });
-    });
-}
-
 //--- load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
@@ -287,3 +300,12 @@ function resetFiltersAndViewer() {
     // Clear Google Drive frame
     embedWrap.innerHTML = "";
 }
+
+// Automatically load the subject list
+window.addEventListener("DOMContentLoaded", async () => {
+    const list = await fetch('/api/subjects/all').then(r => r.json());
+    showAutocomplete(list);
+    //Load favourites from localStorage into UI
+    renderFavourites();
+    updateFavButton();
+});
