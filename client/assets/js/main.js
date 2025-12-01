@@ -43,28 +43,48 @@ function renderFavouritesPlaceholder() {
 renderFavouritesPlaceholder();
 
 //Render Favourites Panel
+let subjects = []; // cache all subjects on load
+
+// Fetch all subjects at start
+window.addEventListener("DOMContentLoaded", async () => {
+    subjects = await fetch('/api/subjects/all').then(r => r.json());
+    showAutocomplete(subjects);
+    renderFavourites();
+    updateFavButton();
+});
+
 async function renderFavourites() {
     if (!favList) return;
     if (favourites.length === 0) {
         favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
         return;
     }
+
     favList.innerHTML = "";
-    //Loop Favourite
+
     for (const id of favourites) {
-        const test = await fetchTestById(id);
-        const div = document.createElement('div');
-        div.className = 'fav-item mb-2 p-2 border rounded';
-        div.innerHTML = `
-            <b>${test.title}</b><br>
-            <small>${test.university} — ${test.year} Semester ${test.semester}</small>
-            <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
-            Remove</button>`;
-            //click to load test
-        div.addEventListener("click", () => loadTest(test));
-        favList.appendChild(div);
+        try {
+            const test = await fetchTestById(id); // fetch test data
+            const subject = subjects.find(s => s.id === test.subject_id);
+            const title = subject ? subject.title : "Unknown Subject";
+
+            const div = document.createElement('div');
+            div.className = 'fav-item mb-2 p-2 border rounded';
+            div.innerHTML = `
+                <b>${title}</b><br>
+                <small>${test.university} — ${test.year} Semester ${test.semester}</small>
+                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">Remove</button>
+            `;
+            // Click to load test
+            div.addEventListener("click", () => loadTest(test));
+            favList.appendChild(div);
+
+        } catch (e) {
+            console.error("Failed to fetch favourite test", id, e);
+        }
     }
-    //Remove button listeners
+
+    // Remove button listeners
     document.querySelectorAll(".remove-fav").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -300,12 +320,3 @@ function resetFiltersAndViewer() {
     // Clear Google Drive frame
     embedWrap.innerHTML = "";
 }
-
-// Automatically load the subject list
-window.addEventListener("DOMContentLoaded", async () => {
-    const list = await fetch('/api/subjects/all').then(r => r.json());
-    showAutocomplete(list);
-    //Load favourites from localStorage into UI
-    renderFavourites();
-    updateFavButton();
-});
