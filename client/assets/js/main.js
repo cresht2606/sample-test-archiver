@@ -320,12 +320,3 @@ function resetFiltersAndViewer() {
     // Clear Google Drive frame
     embedWrap.innerHTML = "";
 }
-
-// Automatically load the subject list
-window.addEventListener("DOMContentLoaded", async () => {
-    const list = await fetch('/api/subjects/all').then(r => r.json());
-    showAutocomplete(list);
-    //Load favourites from localStorage into UI
-    renderFavourites();
-    updateFavButton();
-});
