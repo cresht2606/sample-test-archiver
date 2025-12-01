@@ -53,12 +53,12 @@ async function renderFavourites() {
     //Loop Favourite
     for (const id of favourites) {
         const test = await fetchTestById(id);
-        const div = document.createElement('div');
-        div.className = 'fav-item mb-2 p-2 border rounded';
-        div.innerHTML = `
-            <b>${test.title}</b><br>
-            <small>${test.university} — ${test.year} Semester ${test.semester}</small>
-            <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
+        const [subject] = await fetch(`/api/subjects/${test.subject_id}`).then(r => r.json());
+        const description = `${subject.name} — ${test.university} — ${test.year} Semester ${test.semester} — ${test.type}`;
+        div.innerHTML = ` <div class="fav-text" style="display:flex; flex-direction:column; justify-content:center;">
+            <small>${description}</small> </div>
+            <small>${test.university} — ${test.year} Semester ${test.semester}</small> </div>
+            <button class="btn btn-sm btn-outline-danger remove-fav" data-id="${id}">
             Remove</button>`;
             //click to load test
         div.addEventListener("click", () => loadTest(test));
