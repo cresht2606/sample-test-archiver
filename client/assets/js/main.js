@@ -5,6 +5,12 @@ import {
     fetchTestById
 } from "./api.js";
 
+import {
+    getFavourites,
+    toggleFavourite,
+    isFavourite
+} from "./utils.js";
+
 const input = document.getElementById('searchInput');
 const embedWrap = document.getElementById('embedWrap');
 
@@ -15,19 +21,18 @@ const selUniversity = document.getElementById('selUniversity');
 
 const favBtn = document.getElementById('favBtn');
 const favList = document.getElementById('favList');
-const viewsBtn = document.getElementById('viewsBtn');
 const viewsCountSpan = document.getElementById('viewsCount');
 
 let selectedSubjectId = null;
 let selectedTest = null;
-let favourites = JSON.parse(localStorage.getItem("favourites") || "[]"); // Favourite Storage
+let favourites = getFavourites(); // Favourite storage
 
 function updateFavButton() {
     if (!selectedTest) {
         favBtn.textContent = "☆ Add to favourite";
         return;
     }
-    if (favourites.includes(selectedTest.id)) {
+    if (isFavourite(selectedTest.id)) {
         favBtn.textContent = "★ Favourited";
     }
     else {
@@ -55,6 +60,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function renderFavourites() {
     if (!favList) return;
+
+    favourites = getFavourites(); // refresh
+
     if (favourites.length === 0) {
         favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
         return;
@@ -64,18 +72,21 @@ async function renderFavourites() {
 
     for (const id of favourites) {
         try {
-            const test = await fetchTestById(id); // fetch test data
+            const test = await fetchTestById(id);
             const subject = subjects.find(s => s.id === test.subject_id);
             const title = subject ? subject.title : "Unknown Subject";
 
             const div = document.createElement('div');
             div.className = 'fav-item mb-2 p-2 border rounded';
+
             div.innerHTML = `
                 <b>${title}</b><br>
                 <small>${test.university} — ${test.year} Semester ${test.semester}</small>
-                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">Remove</button>
+                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
+                    Remove
+                </button>
             `;
-            // Click to load test
+
             div.addEventListener("click", () => loadTest(test));
             favList.appendChild(div);
 
@@ -84,13 +95,13 @@ async function renderFavourites() {
         }
     }
 
-    // Remove button listeners
     document.querySelectorAll(".remove-fav").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
-            const id = Number(btn.dataset.id);
-            favourites = favourites.filter(f => f !== id);
-            localStorage.setItem("favourites", JSON.stringify(favourites));
+
+            const testId = Number(btn.dataset.id);
+            favourites = toggleFavourite(testId);  // <— UTIL
+
             renderFavourites();
             updateFavButton();
         });
@@ -103,17 +114,9 @@ if (favBtn) {
             alert("Select a test first!");
             return;
         }
-        const id = selectedTest.id;
-        // If already in favourite => do nothing
-        if (favourites.includes(id)) {
-            //Unfavourite
-            favourites = favourites.filter(f => f !== id);
-        }
-        else {
-            //Favourite
-            favourites.push(id);
-        }
-        localStorage.setItem("favourites", JSON.stringify(favourites));
+
+        favourites = toggleFavourite(selectedTest.id); // Call from utils.js
+
         updateFavButton();
         renderFavourites();
     });
@@ -278,23 +281,23 @@ document.addEventListener('click', (e) => {
 // ---------- Load Test Viewer ----------
 function loadTest(test) {
     selectedTest = test;
-// --- View counter in local storage ---
+    // --- View counter in local storage ---
 
-let views = JSON.parse(localStorage.getItem("testViews") || "{}");
-// No view count yet => set to 0 first
-if (!views[test.id]) {
-    views[test.id] = 0;
-}
-//increment of view count
-views[test.id]++;
-//save back
-localStorage.setItem("testViews", JSON.stringify(views));
-//update UI count
-if (viewsCountSpan) {
-    viewsCountSpan.textContent = views[test.id];
-}
+    let views = JSON.parse(localStorage.getItem("testViews") || "{}");
+    // No view count yet => set to 0 first
+    if (!views[test.id]) {
+        views[test.id] = 0;
+    }
+    //increment of view count
+    views[test.id]++;
+    //save back
+    localStorage.setItem("testViews", JSON.stringify(views));
+    //update UI count
+    if (viewsCountSpan) {
+        viewsCountSpan.textContent = views[test.id];
+    }
 
-//--- load Drive Viewer---
+    //--- load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
       <iframe src="${test.drive_embed_url}" width="640" height="480" allowfullscreen></iframe>
