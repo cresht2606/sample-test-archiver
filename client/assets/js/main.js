@@ -43,28 +43,48 @@ function renderFavouritesPlaceholder() {
 renderFavouritesPlaceholder();
 
 //Render Favourites Panel
+let subjects = []; // cache all subjects on load
+
+// Fetch all subjects at start
+window.addEventListener("DOMContentLoaded", async () => {
+    subjects = await fetch('/api/subjects/all').then(r => r.json());
+    showAutocomplete(subjects);
+    renderFavourites();
+    updateFavButton();
+});
+
 async function renderFavourites() {
     if (!favList) return;
     if (favourites.length === 0) {
         favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
         return;
     }
+
     favList.innerHTML = "";
-    //Loop Favourite
+
     for (const id of favourites) {
-        const test = await fetchTestById(id);
-        const [subject] = await fetch(`/api/subjects/${test.subject_id}`).then(r => r.json());
-        const description = `${subject.name} — ${test.university} — ${test.year} Semester ${test.semester} — ${test.type}`;
-        div.innerHTML = ` <div class="fav-text" style="display:flex; flex-direction:column; justify-content:center;">
-            <small>${description}</small> </div>
-            <small>${test.university} — ${test.year} Semester ${test.semester}</small> </div>
-            <button class="btn btn-sm btn-outline-danger remove-fav" data-id="${id}">
-            Remove</button>`;
-            //click to load test
-        div.addEventListener("click", () => loadTest(test));
-        favList.appendChild(div);
+        try {
+            const test = await fetchTestById(id); // fetch test data
+            const subject = subjects.find(s => s.id === test.subject_id);
+            const title = subject ? subject.title : "Unknown Subject";
+
+            const div = document.createElement('div');
+            div.className = 'fav-item mb-2 p-2 border rounded';
+            div.innerHTML = `
+                <b>${title}</b><br>
+                <small>${test.university} — ${test.year} Semester ${test.semester}</small>
+                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">Remove</button>
+            `;
+            // Click to load test
+            div.addEventListener("click", () => loadTest(test));
+            favList.appendChild(div);
+
+        } catch (e) {
+            console.error("Failed to fetch favourite test", id, e);
+        }
     }
-    //Remove button listeners
+
+    // Remove button listeners
     document.querySelectorAll(".remove-fav").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
