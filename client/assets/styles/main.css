@@ -135,6 +135,19 @@ body {
     border-radius: 999px;
 }
 
+.fav-item {
+    position: relative;
+    padding-right: 80px; /* give the button space */
+}
+
+.remove-fav {
+    position: absolute !important;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    float: none !important; /* cancel bootstrap float */
+}
+
 /* FAVOURITES CARD */
 .fav-card {
     background: #f4f8ff;
