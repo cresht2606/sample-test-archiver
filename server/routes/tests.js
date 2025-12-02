@@ -71,19 +71,18 @@ router.get('/:id', async (req, res) => {
 
 //View counter by session
 router.post('/view/:id', async (req, res) => {
-    const id = req.params.id;
+    const testId = req.params.id;
     try {
         const [result] = await pool.query(
-            "UPDATE tests SET views = views + 1 WHERE id = ?", [id]
+            'UPDATE tests SET views = views + 1 WHERE id = ?', [testId]
         );
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: "not_found" });
+            return res.status(404).json({ error: 'not_found' });
         }
         res.json({ success: true });
-    }
-    catch (err) {
-        console.error("View update failed:", err);
-        res.status(500).json({ error: "db_error" });
+    } catch (err) {
+        console.error('View update failed:', err);
+        res.status(500).json({ error: 'db_error' });
     }
 });
 
