@@ -8,7 +8,8 @@ import {
 import {
     getFavourites,
     toggleFavourite,
-    isFavourite
+    isFavourite,
+    incrementView
 } from "./utils.js";
 
 const input = document.getElementById('searchInput');
@@ -281,28 +282,8 @@ document.addEventListener('click', (e) => {
 // ---------- Load Test Viewer ----------
 function loadTest(test) {
     selectedTest = test;
-    // --- View counter in local storage ---
-    let views = JSON.parse(localStorage.getItem("testViews") || "{}");
-    //Track which tests were viewed in THIS session
-    let sessionViewed = JSON.parse(sessionStorage.getItem("sessionViewed") || "[]");
-
-    // No view count yet => set to 0 first
-    if (!sessionViewed.includes(test.id)) {
-        if (!views[test.id]) views[test.id] = 0;
-        //Increment of view count
-        views[test.id]++;
-        localStorage.setItem("testViews", JSON.stringify(views));
-        if (viewsCountSpan) viewsCountSpan.textContent = views[test.id];
-        //Mark as viewed in session
-        sessionViewed.push(test.id);
-        sessionStorage.setItem("sessionViewed", JSON.stringify(sessionViewed));
-        fetch(`/api/tests/view/${test.id}`, { method: "POST" })
-        .catch(err => console.error("Failed to update server view count", err));
-    }
-    else {
-        if (viewsCountSpan) viewsCountSpan.textContent = views[test.id] || 0;
-    }
-
+    // Session-aware view tracking
+    incrementView(test.id, viewsCountSpan);
     //--- load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
