@@ -28,6 +28,8 @@ CREATE TABLE tests (
     -- Constraint On FK
     CONSTRAINT fk_subject FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE -- delete all tests if subject is feleted
 );
+-- Add the views column
+    ALTER TABLE tests ADD COLUMN views INT DEFAULT 0;
 
 -- Changelog entries
 CREATE TABLE IF NOT EXISTS changelog(
