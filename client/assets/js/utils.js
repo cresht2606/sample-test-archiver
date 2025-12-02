@@ -28,3 +28,18 @@ export function toggleFavourite(testId) {
 };
 
 // ------------------ VIEW TRACKER GOES HERE ------------------
+
+export function hasViewedThisSession(testId) {
+    const viewed = JSON.parse(sessionStorage.getItem("viewedTests") || "{}");
+    return viewed[testId] === true;
+};
+
+export function markViewedThisSession(testId) {
+    const viewed = JSON.parse(sessionStorage.getItem("viewedTests") || "{}");
+    viewed[testId] = true;
+    sessionStorage.setItem("viewedTests", JSON.stringify(viewed));
+};
+
+export function shouldIncreaseView(testId) {
+    return !hasViewedThisSession(testId);
+};
