@@ -18,19 +18,37 @@
 <body>
 
     <!--HEADER-->
-    <!-- py-3: SET PADDING Y FOR TOP AND BOTTOM TO 3PX -->
-    <!-- d-flex: FLEX BEHAVIOURS -->
-    <!-- align-items-center -->
-    <!-- justify-content-between -->
+    <header class="site-header py-1">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <!-- Branding Link (Home) -->
+                <a href="/index.html"
+                    class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+                    <img src="assets/images/pi2.png" alt="Cresht Logo" class="brand-logo me-2">
+                </a>
 
-    <header class="site-header py-3">
-        <div class="container d-flex align-items-center justify-content-between">
-            <a class="brand" href="/index.html"> 📚 Cresht </a>
-            <nav class="nav">
-                <a class="nav-link" href="/changelog.html"> Changelog </a>
-                <a class="nav-link" data-bs-toggle="modal" data-bs-target="#fbModal"> Feedback </a>
-                <a class="nav-link" target="_blank" href="https://cresht2606.github.io/"> About </a>
-            </nav>
+                <!-- Navigation Links -->
+                <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+                    <li>
+                        <a href="/changelog.html" class="nav-link text-white">
+                            <i class="fa-regular fa-pen-to-square d-block mx-auto mb-1" style="font-size: 20px;"></i>
+                            Changelog
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#fbModal">
+                            <i class="fa-regular fa-comment-dots d-block mx-auto mb-1" style="font-size: 20px;"></i>
+                            Feedback
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://cresht2606.github.io/" target="_blank" class="nav-link text-white">
+                            <i class="fa-regular fa-address-card d-block mx-auto mb-1" style="font-size: 20px;"></i>
+                            About
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </header>
 
@@ -51,13 +69,23 @@
     </main>
 
     <!-- FOOTER -->
-    <footer>
-        <div class="container">
-            <div class="panel text-center small"> Cresht. @ All Rights Reserved. 2024 - 2025 </div>
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
+        <div class="col-md-4 d-flex align-items-center">
+            <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Cresht, Inc</span>
         </div>
+        <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+            <li class="ms-3">
+                <a class="text-body-secondary social-link" href="https://github.com/cresht2606/sample-test-archiver"
+                    target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+                    <i class="fa-brands fa-github" style="font-size: 24px;"></i>
+                </a>
+            </li>
+        </ul>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/713e56cd45.js" crossorigin="anonymous"></script>
+    <script type="module" src="assets/js/main.js"></script>
     <script src="/assets/js/changelog.js"></script>
 
     <!-- FEEDBACK MODAL -->

@@ -13,34 +13,32 @@
 
 <body>
     <!-- HEADER -->
-    <header class="site-header py-3">
+    <header class="site-header py-1">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <!-- Branding Link (Home) -->
-                <a href="/index.html" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                    <svg class="bi me-2" width="40" height="32" role="img" aria-label="Logo">
-                        <use xlink:href="#bootstrap"></use>
-                    </svg>
-                    <span class="fs-4">📚 Cresht</span>
+                <a href="/index.html"
+                    class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+                    <img src="assets/images/pi2.png" alt="Cresht Logo" class="brand-logo me-2">
                 </a>
 
                 <!-- Navigation Links -->
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
                     <li>
                         <a href="/changelog.html" class="nav-link text-white">
-                            <i class="fa-regular fa-pen-to-square d-block mx-auto mb-1" style="font-size: 24px;"></i>
+                            <i class="fa-regular fa-pen-to-square d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             Changelog
                         </a>
                     </li>
                     <li>
                         <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#fbModal">
-                            <i class="fa-regular fa-comment-dots d-block mx-auto mb-1" style="font-size: 24px;"></i>
+                            <i class="fa-regular fa-comment-dots d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             Feedback
                         </a>
                     </li>
                     <li>
                         <a href="https://cresht2606.github.io/" target="_blank" class="nav-link text-white">
-                            <i class="fa-regular fa-address-card d-block mx-auto mb-1" style="font-size: 24px;"></i>
+                            <i class="fa-regular fa-address-card d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             About
                         </a>
                     </li>
@@ -83,7 +81,7 @@
                 </div>
 
                 <!-- ACTIONS: VIEWS + FAVOURITES -->
-                <div class="d-flex justify-content-center gap-2 align-items-center mb-3">
+                <div class="action-row d-flex justify-content-center gap-2 align-items-center mb-3">
                     <button id="viewsBtn" class="btn btn-danger btn-sm">
                         👁 Views <span id="viewsCount" class="badge bg-light text-dark ms-2">0</span>
                     </button>
@@ -107,14 +105,15 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
         <div class="col-md-4 d-flex align-items-center">
             <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Cresht, Inc</span>
         </div>
         <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
             <li class="ms-3">
-                <a class="text-body-secondary" href="https://github.com/cresht2606/sample-test-archiver" aria-label="Edit">
-                    <i class="fa-brands fa-github" style = "font-size: 24px;"></i>
+                <a class="text-body-secondary social-link" href="https://github.com/cresht2606/sample-test-archiver"
+                    target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+                    <i class="fa-brands fa-github" style="font-size: 24px;"></i>
                 </a>
             </li>
         </ul>
