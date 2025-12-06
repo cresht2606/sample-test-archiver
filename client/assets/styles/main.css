@@ -164,6 +164,28 @@ footer {
     margin-top: auto;
     padding: 1rem 0;
     text-align: center;
+    width: 100%; /* Ensure the footer doesn't overflow */
+    box-sizing: border-box; /* Include padding and borders in width calculation */
+}
+
+/* Ensure footer text is clearly visible */
+footer .text-body-secondary {
+    color: #ddd !important; /* Lighter text color for contrast */
+}
+
+/* Optionally adjust footer padding and other properties for better spacing */
+footer .container {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+footer .nav li {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+footer span {
+    margin-left: 24px;
 }
 
 .site-footer .panel {
@@ -172,6 +194,7 @@ footer {
     border: none;
     color: #fff;
 }
+
 
 /* RESPONSIVE DESIGN */
 @media (max-width: 991px) {
