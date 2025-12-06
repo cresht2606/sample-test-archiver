@@ -42,9 +42,16 @@ body {
 }
 
 .site-header .nav-link {
+    font-size: 0.9rem;
     color: #fff;
     opacity: 0.9;
     margin-left: 0.75rem;
+}
+
+.brand-logo {
+    height: 64px;
+    width: auto;
+    display: block;
 }
 
 /* PAGE TITLE */
@@ -106,9 +113,9 @@ body {
     overflow: hidden;
 }
 
-.d-flex.justify-content-center.gap-2.align-items-center.mb-3 {
+/* Button row spacing (fixed selector) */
+.action-row {
     margin-top: 7rem;
-    /* pushes the buttons down */
 }
 
 /* EMBED PLACEHOLDER */
@@ -137,7 +144,8 @@ body {
 
 .fav-item {
     position: relative;
-    padding-right: 80px; /* give the button space */
+    padding-right: 80px;
+    /* give the button space */
 }
 
 .remove-fav {
@@ -145,7 +153,8 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    float: none !important; /* cancel bootstrap float */
+    float: none !important;
+    /* cancel bootstrap float */
 }
 
 /* FAVOURITES CARD */
@@ -164,13 +173,15 @@ footer {
     margin-top: auto;
     padding: 1rem 0;
     text-align: center;
-    width: 100%; /* Ensure the footer doesn't overflow */
-    box-sizing: border-box; /* Include padding and borders in width calculation */
+    width: 100%;
+    /* Ensure the footer doesn't overflow */
+    box-sizing: border-box;
 }
 
 /* Ensure footer text is clearly visible */
 footer .text-body-secondary {
-    color: #ddd !important; /* Lighter text color for contrast */
+    color: #ddd !important;
+    /* Lighter text color for contrast */
 }
 
 /* Optionally adjust footer padding and other properties for better spacing */
@@ -195,6 +206,29 @@ footer span {
     color: #fff;
 }
 
+/* HEADER HOVER EFFECTS */
+.site-header .nav-link {
+    transition: color 0.3s, transform 0.2s;
+}
+
+.site-header .nav-link:hover {
+    color: var(--accent);
+    /* Red accent color on hover */
+    transform: translateY(-2px);
+    /* Slight lift */
+}
+
+/* FOOTER HOVER EFFECTS */
+footer .social-link i {
+    transition: color 0.3s, transform 0.2s;
+}
+
+footer .social-link:hover i {
+    color: var(--accent);
+    /* Red accent on hover */
+    transform: scale(1.1);
+    /* Slight zoom */
+}
 
 /* RESPONSIVE DESIGN */
 @media (max-width: 991px) {
