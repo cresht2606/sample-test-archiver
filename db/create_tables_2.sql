@@ -40,6 +40,33 @@ CREATE TABLE IF NOT EXISTS changelog(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Feedback Table
+CREATE TABLE feedback (
+	id SERIAL PRIMARY KEY,
+    user_fullname VARCHAR(120),
+    email VARCHAR(120),
+    dob DATE,
+    problem_type VARCHAR(50) CHECK (problem_type IN ("website", "sample_test")),
+    test_id INT REFERENCES tests(id) ON DELETE SET NULL,
+    rating INT CHECK (rating >= 1 AND rating <= 5),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Rating Table
+CREATE TABLE test_ratings (
+	test_id INT PRIMARY KEY REFERENCES tests(id),
+	avg_rating DECIMAL (3, 2) DEFAULT 0,
+	total_reviews INT DEFAULT 0
+);
+
+-- Feedback Export Table
+CREATE TABLE feedback_export_queue (
+	id SERIAL PRIMARY KEY,
+    feedback_id INT REFERENCES feedback(id),
+    exported BOOLEAN DEFAULT FALSE
+);
+
 -- Useful indexes
 CREATE INDEX idx_tests_subject ON tests(subject_id);
 CREATE INDEX idx_tests_filters ON tests(year, semester, type, university);
