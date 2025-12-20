@@ -6,14 +6,13 @@ require('dotenv').config();
 
 // Database connection (pool)
 const pool = mysql.createPool({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DB,
-    port: process.env.MYSQL_PORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 20,
-    charset: "utf8mb4"
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || 'password',
+    database: process.env.DB_NAME || 'sample_archiver',
+    waitForConnections: true, // Wait for other connections in use
+    connectionLimit: 20, // Maximum number of connections allowed in a pool
+    charset: 'utf8mb4'
 });
 
 // Connection Test On Startup
