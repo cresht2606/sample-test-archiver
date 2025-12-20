@@ -351,9 +351,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Ensure that the user has selected values for university, year, semester, and type when applicable
-        if (!fbUniversity?.value || !fbYear?.value || !fbSemester?.value || !fbType?.value) {
-            alert("Please ensure all filters (University, Year, Semester, Type) are selected.");
-            return;
+        if (probType === "sample_test") {
+            if (!fbUniversity?.value || !fbYear?.value || !fbSemester?.value || !fbType?.value) {
+                alert("Please ensure all filters (University, Year, Semester, Type) are selected.");
+                return;
+            }
         }
 
         const payload = {
