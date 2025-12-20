@@ -1,25 +1,58 @@
-const mysql = require('mysql2/promise');
-const fs = require('fs');
-require('dotenv').config();
+import fs from "fs";
+import path from "path";
+import mysql from "mysql2/promise";
 
-async function runMigration() {
-  try {
-    const connection = await mysql.createConnection({
-      host: process.env.MYSQLHOST,
-      user: process.env.MYSQLUSER,
-      password: process.env.MYSQLPASSWORD,
-      database: process.env.MYSQLDATABASE,
-      multipleStatements: true
-    });
+const connection = await mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
 
-    const sql = fs.readFileSync('migrations/001_init.sql', 'utf8');
-    await connection.query(sql);
-    console.log('Migration completed successfully');
-    await connection.end();
-  } catch (error) {
-    console.error('Migration failed:', error);
-    process.exit(1); // Stop if migration fails
+// 1. ensure migrations table
+await connection.query(`
+  CREATE TABLE IF NOT EXISTS migrations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    run_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+const migrationsDir = "./migrations";
+const files = fs.readdirSync(migrationsDir).sort();
+
+for (const file of files) {
+  const [rows] = await connection.query(
+    "SELECT 1 FROM migrations WHERE name = ?",
+    [file]
+  );
+
+  if (rows.length) {
+    console.log(`✓ Skipped ${file}`);
+    continue;
   }
+
+  console.log(`▶ Running ${file}`);
+  const sql = fs.readFileSync(
+    path.join(migrationsDir, file),
+    "utf8"
+  );
+
+  const statements = sql
+    .split(/;\s*\n/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  for (const stmt of statements) {
+    await connection.query(stmt);
+  }
+
+  await connection.query(
+    "INSERT INTO migrations (name) VALUES (?)",
+    [file]
+  );
+
+  console.log(`✔ Applied ${file}`);
 }
 
-runMigration();
+await connection.end();
