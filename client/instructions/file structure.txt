@@ -1,0 +1,45 @@
+SAMPLE-TEST-ARCHIVER-TESTING/
+│
+├── client/                                # Static resources used by the frontend
+│   ├── assets/
+│   │   ├── images/                        # Image files (icons, graphics, UI assets)
+│   │   ├── js/                            # Client-side JavaScript files
+│   │   └── styles/                        # CSS or styling files for the frontend
+│   │
+│   ├── backups/                           # Archived backups of project versions or data
+│   │   ├── December 6th, 2025.rar
+│   │   ├── November 4th, 2025.rar
+│   │   ├── November 28th, 2025.rar
+│   │   └── November 29th, 2025.rar
+│   │
+│   ├── instructions/                      # Documentation and instructional materials
+│   │   ├── frmMain.java
+│   │   ├── Logical Back-end.docx
+│   │   └── Structure.txt
+│   │
+│   ├── 404.html                           # Custom error page for "Page Not Found"
+│   ├── changelog.html                     # Frontend page displaying system change history
+│   ├── feedback.html                      # User feedback or contact form page
+│   └── index.html                         # Main entry point of the frontend application
+│
+├── db/                                    # Database-related scripts and queries
+│   ├── create_tables_2.sql
+│   ├── create_tables.sql
+│   └── View total View query.sql
+│
+├── node_modules/                          # Installed Node.js dependencies (auto-generated)
+│
+├── server/                                # Backend server application
+│   ├── routes/                            # API route definitions
+│   │   ├── changelog.js                   # API endpoints for changelog data
+│   │   ├── subjects.js                    # API endpoints for subject-related operations
+│   │   └── tests.js                       # API endpoints for test-related operations
+│   │
+│   ├── utils/                             # Utility and helper modules
+│   │   └── db.js                          # Database connection and query helper functions
+│   │
+│   └── server.js                          # Main backend server entry point
+│
+├── package-lock.json                      # Auto-generated dependency lock file for Node.js
+└── package.json                           # Node.js project configuration and dependency definitions
+
