@@ -5,24 +5,40 @@ const pool = require('../utils/db'); // Import the MySQL connection pool from th
 
 // GET /api/changelog?page=1&per_page=5
 router.get('/', async (req, res) => {
-    // Parse the 'page' query parameter, default to 1 if not provided
-    const page = Math.max(1, parseInt(req.query.page || '1'));
-    // Parse the 'per_page' query parameter, default to 5 if not provided
-    const per_page = Math.max(1, parseInt(req.query.per_page || '5'));
-    // Calculate the offset for pagination (i.e., how many records to skip)
-    const offset = (page - 1) * per_page;
-
-    // Query the database to retrieve changelog records
     try {
-        const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM changelog');
-        const [rows] = await pool.query('SELECT * FROM changelog ORDER BY date DESC LIMIT ? OFFSET ?', [per_page, offset]);
+        // ---- Parse & Validate Query Params ----
+        const page = Number(req.query.page) > 0 ? Number(req.query.page) : 1;
+        const per_page = Number(req.query.per_page) > 0 ? Number(req.query.per_page) : 5;
 
+        // Calculate the offset for pagination (i.e., how many records to skip)
+        const offset = (page - 1) * per_page;
+
+        // Query the database to retrieve changelog records
+        const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM changelog');
+        const [rows] = await pool.query(`
+            SELECT 
+                id,
+                version,
+                DATE_FORMAT(date, '%Y-%m-%d') AS date,
+                body,
+                DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+            FROM changelog
+            ORDER BY date DESC, id DESC
+            LIMIT ? OFFSET ?
+        `, [per_page, offset]);
+
+        // ---- Response ----
         res.json({
-            total, page, per_page, data: rows
+            success: true,
+            page,
+            per_page,
+            total,
+            total_pages: Math.ceil(total / per_page),
+            data: rows
         });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: 'db_eror' });
+        res.status(500).json({ success: false, error: "db_error" });
     }
 });
 

@@ -27,3 +27,10 @@ export async function fetchTestById(id) {
     const res = await fetch(`/api/tests/${id}`);
     return res.json();
 }
+
+export async function incrementTestView(testId) {
+    const res = await fetch(`/api/tests/${testId}/view`, {
+        method: 'POST'
+    });
+    return res.json();
+}

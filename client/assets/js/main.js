@@ -5,6 +5,13 @@ import {
     fetchTestById
 } from "./api.js";
 
+import {
+    getFavourites,
+    toggleFavourite,
+    isFavourite,
+    incrementView
+} from "./utils.js";
+
 const input = document.getElementById('searchInput');
 const embedWrap = document.getElementById('embedWrap');
 
@@ -15,19 +22,25 @@ const selUniversity = document.getElementById('selUniversity');
 
 const favBtn = document.getElementById('favBtn');
 const favList = document.getElementById('favList');
-const viewsBtn = document.getElementById('viewsBtn');
 const viewsCountSpan = document.getElementById('viewsCount');
+
+const avgRatingWrap = document.getElementById("avgRatingWrap");
+const avgStars = document.querySelectorAll("#avgStars .star");
+const avgRatingValue = document.getElementById("avgRatingValue");
+const totalReviews = document.getElementById("totalReviews");
 
 let selectedSubjectId = null;
 let selectedTest = null;
-let favourites = JSON.parse(localStorage.getItem("favourites") || "[]"); // Favourite Storage
+let favourites = getFavourites(); // Favourite storage
+
+let lastViewedTestId = null;
 
 function updateFavButton() {
     if (!selectedTest) {
         favBtn.textContent = "☆ Add to favourite";
         return;
     }
-    if (favourites.includes(selectedTest.id)) {
+    if (isFavourite(selectedTest.id)) {
         favBtn.textContent = "★ Favourited";
     }
     else {
@@ -55,6 +68,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 async function renderFavourites() {
     if (!favList) return;
+
+    favourites = getFavourites(); // refresh
+
     if (favourites.length === 0) {
         favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
         return;
@@ -64,18 +80,21 @@ async function renderFavourites() {
 
     for (const id of favourites) {
         try {
-            const test = await fetchTestById(id); // fetch test data
+            const test = await fetchTestById(id);
             const subject = subjects.find(s => s.id === test.subject_id);
             const title = subject ? subject.title : "Unknown Subject";
 
             const div = document.createElement('div');
             div.className = 'fav-item mb-2 p-2 border rounded';
+
             div.innerHTML = `
                 <b>${title}</b><br>
-                <small>${test.university} — ${test.year} Semester ${test.semester}</small>
-                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">Remove</button>
+                <small>${test.university} — ${test.year} Semester ${test.semester} (${test.type})</small>
+                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
+                    Remove
+                </button>
             `;
-            // Click to load test
+
             div.addEventListener("click", () => loadTest(test));
             favList.appendChild(div);
 
@@ -84,13 +103,13 @@ async function renderFavourites() {
         }
     }
 
-    // Remove button listeners
     document.querySelectorAll(".remove-fav").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
-            const id = Number(btn.dataset.id);
-            favourites = favourites.filter(f => f !== id);
-            localStorage.setItem("favourites", JSON.stringify(favourites));
+
+            const testId = Number(btn.dataset.id);
+            favourites = toggleFavourite(testId);  // <— UTIL
+
             renderFavourites();
             updateFavButton();
         });
@@ -103,17 +122,9 @@ if (favBtn) {
             alert("Select a test first!");
             return;
         }
-        const id = selectedTest.id;
-        // If already in favourite => do nothing
-        if (favourites.includes(id)) {
-            //Unfavourite
-            favourites = favourites.filter(f => f !== id);
-        }
-        else {
-            //Favourite
-            favourites.push(id);
-        }
-        localStorage.setItem("favourites", JSON.stringify(favourites));
+
+        favourites = toggleFavourite(selectedTest.id); // Call from utils.js
+
         updateFavButton();
         renderFavourites();
     });
@@ -276,35 +287,32 @@ document.addEventListener('click', (e) => {
 });
 
 // ---------- Load Test Viewer ----------
-function loadTest(test) {
+async function loadTest(test) {
     selectedTest = test;
-// --- View counter in local storage ---
 
-let views = JSON.parse(localStorage.getItem("testViews") || "{}");
-// No view count yet => set to 0 first
-if (!views[test.id]) {
-    views[test.id] = 0;
-}
-//increment of view count
-views[test.id]++;
-//save back
-localStorage.setItem("testViews", JSON.stringify(views));
-//update UI count
-if (viewsCountSpan) {
-    viewsCountSpan.textContent = views[test.id];
-}
+    if (lastViewedTestId !== test.id) {
+        incrementView(test.id, viewsCountSpan);
+        lastViewedTestId = test.id;
+    }
 
-//--- load Drive Viewer---
+    // --- Load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
       <iframe src="${test.drive_embed_url}" width="640" height="480" allowfullscreen></iframe>
     </div>`;
+
+    // --- Load average rating for this test ---
+    await loadAvgRating(test.id);
+
+    // --- Update favourite button ---
+    updateFavButton();
 }
 
 // Reset filters and viewer
 function resetFiltersAndViewer() {
     selectedSubjectId = null;
     selectedTest = null;
+    lastViewedTestId = null;
 
     // Reset dropdowns
     selUniversity.innerHTML = `<option value="" disabled hidden selected>University</option>`;
@@ -319,4 +327,67 @@ function resetFiltersAndViewer() {
 
     // Clear Google Drive frame
     embedWrap.innerHTML = "";
+
+    // Clear view tracking (sessionStorage)
+    sessionStorage.removeItem('viewedTests');
+
+    // Reset views count UI to 0
+    if (viewsCountSpan) {
+        viewsCountSpan.textContent = "0";
+    }
+
+    // Reset favourites UI and button
+    renderFavourites();
+    updateFavButton();
+
+    localStorage.removeItem("testViews");
+
+    // Hide average rating
+    avgRatingWrap.classList.add("d-none");
+}
+
+function renderAvgRating(avg) {
+    console.log("Rendering stars for avg:", avg);
+    avgStars.forEach((star, i) => {
+        star.className = 'star'; // reset all stars
+
+        if (avg >= i + 1) {
+            star.classList.add('full');
+            star.style.removeProperty('--fill-percent');
+        } else if (avg > i && avg < i + 1) {
+            star.classList.add('partial');
+            star.style.setProperty('--fill-percent', `${(avg - i) * 100}%`);
+        } else {
+            star.classList.add('empty');
+            star.style.removeProperty('--fill-percent');
+        }
+
+        // Make stars unclickable and non-interactive
+        star.style.pointerEvents = 'none'; // Disable click events on stars
+        star.style.cursor = 'default'; // Make cursor default (not a pointer)
+    });
+}
+
+async function loadAvgRating(testId) {
+    try {
+        const res = await fetch(`/api/tests/${testId}/rating`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        // Update numeric rating
+        avgRatingValue.textContent = Number(data.avg_rating).toFixed(2);
+        totalReviews.textContent = data.total_reviews;
+
+        // Update stars
+        renderAvgRating(data.avg_rating);
+
+        // Show rating container
+        avgRatingWrap.classList.remove("d-none");
+
+    } catch (err) {
+        console.error("Failed to load avg rating:", err);
+        // hide if fetch fails
+        avgRatingWrap.classList.add("d-none");
+    }
 }

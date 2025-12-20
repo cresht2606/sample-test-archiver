@@ -1,0 +1,76 @@
+/* Star rating container */
+.rating-stars {
+    display: flex;
+    gap: 0.35rem;
+    font-size: 2rem;
+    user-select: none;
+    justify-content: flex-start;
+    position: relative;
+    z-index: 10;
+}
+
+/* Default star */
+.rating-stars .star {
+    cursor: pointer;
+    color: #d0d0d0;
+    transition: color 0.2s ease, transform 0.15s ease;
+}
+
+/* Hover effect */
+.rating-stars .star:hover {
+    transform: scale(1.15);
+}
+
+/* Selected stars */
+.rating-stars .star.selected {
+    color: #ffd700;
+    /* gold */
+}
+
+/* Rating text output */
+#ratingOutput {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.35rem;
+}
+
+/* Sample Test section styling */
+#sampleTestSection {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 0.75rem;
+    border: 1px solid #eee;
+    overflow: visible;
+}
+
+/* Autocomplete dropdown */
+#searchSuggestions {
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+/* Prevent empty autocomplete from blocking clicks */
+#searchSuggestions:empty {
+    pointer-events: none;
+}
+
+.star {
+    font-size: 24px;
+    color: lightgray;
+    position: relative;
+}
+
+.star.full {
+    color: gold;
+}
+
+.star.half::before {
+    content: "\2605";
+    /* ★ */
+    position: absolute;
+    left: 0;
+    width: 50%;
+    overflow: hidden;
+    color: gold;
+}

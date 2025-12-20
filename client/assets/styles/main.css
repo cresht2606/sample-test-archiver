@@ -19,7 +19,7 @@
 /* GLOBAL STRUCTURE */
 html,
 body {
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     background: var(--bg);
@@ -27,6 +27,12 @@ body {
     font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Allow content to grow and push the footer instead of keeping the page locked to the viewport height */
+body > main {
+    flex: 1 0 auto;
+    width: 100%;
 }
 
 /* HEADER */
@@ -42,9 +48,16 @@ body {
 }
 
 .site-header .nav-link {
+    font-size: 0.9rem;
     color: #fff;
     opacity: 0.9;
     margin-left: 0.75rem;
+}
+
+.brand-logo {
+    height: 64px;
+    width: auto;
+    display: block;
 }
 
 /* PAGE TITLE */
@@ -106,9 +119,9 @@ body {
     overflow: hidden;
 }
 
-.d-flex.justify-content-center.gap-2.align-items-center.mb-3 {
-    margin-top: 7rem;
-    /* pushes the buttons down */
+/* Button row spacing (fixed selector) */
+.action-row {
+    margin-top: 3rem;
 }
 
 /* EMBED PLACEHOLDER */
@@ -137,7 +150,8 @@ body {
 
 .fav-item {
     position: relative;
-    padding-right: 80px; /* give the button space */
+    padding-right: 80px;
+    /* give the button space */
 }
 
 .remove-fav {
@@ -145,7 +159,8 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    float: none !important; /* cancel bootstrap float */
+    float: none !important;
+    /* cancel bootstrap float */
 }
 
 /* FAVOURITES CARD */
@@ -156,6 +171,45 @@ body {
     margin-bottom: 0.75rem;
 }
 
+/* STAR RATING */
+.star {
+    color: #ccc;
+    /* default grey */
+    position: relative;
+    display: inline-block;
+    font-size: 1.5rem;
+    cursor: default;
+}
+
+.star.full {
+    color: gold;
+}
+
+.star.partial {
+    color: #ccc;
+    position: relative;
+}
+
+.star.partial::before {
+    content: '★';
+    color: gold;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--fill-percent);
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    display: block;
+    /* add this */
+    height: 100%;
+    /* add this */
+}
+
+.star.empty {
+    color: #ccc;
+}
+
 /* FOOTER */
 footer {
     border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -164,6 +218,30 @@ footer {
     margin-top: auto;
     padding: 1rem 0;
     text-align: center;
+    width: 100%;
+    /* Ensure the footer doesn't overflow */
+    box-sizing: border-box;
+}
+
+/* Ensure footer text is clearly visible */
+footer .text-body-secondary {
+    color: #ddd !important;
+    /* Lighter text color for contrast */
+}
+
+/* Optionally adjust footer padding and other properties for better spacing */
+footer .container {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+footer .nav li {
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+footer span {
+    margin-left: 24px;
 }
 
 .site-footer .panel {
@@ -171,6 +249,30 @@ footer {
     box-shadow: none;
     border: none;
     color: #fff;
+}
+
+/* HEADER HOVER EFFECTS */
+.site-header .nav-link {
+    transition: color 0.3s, transform 0.2s;
+}
+
+.site-header .nav-link:hover {
+    color: var(--accent);
+    /* Red accent color on hover */
+    transform: translateY(-2px);
+    /* Slight lift */
+}
+
+/* FOOTER HOVER EFFECTS */
+footer .social-link i {
+    transition: color 0.3s, transform 0.2s;
+}
+
+footer .social-link:hover i {
+    color: var(--accent);
+    /* Red accent on hover */
+    transform: scale(1.1);
+    /* Slight zoom */
 }
 
 /* RESPONSIVE DESIGN */
