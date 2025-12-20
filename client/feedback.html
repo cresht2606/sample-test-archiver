@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link href="assets/styles/main.css" rel="stylesheet" />
-    <link href="assets/styles/changelog.css" rel="stylesheet" />
-    <link href="assets/styles/feedback.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <title> Feedback Form | Sample Test Archiver </title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <title>Feedback | Sample Test Archiver</title>
+
+    <!-- STA Styles -->
+    <link href="assets/styles/main.css" rel="stylesheet" />
+    <link href="assets/styles/feedback.css" rel="stylesheet" />
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 
 <body>
-    <!-- HEADER -->
+
+    <!-- HEADER (same as STA) -->
     <header class="site-header py-1">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -33,13 +36,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#fbModal">
-                            <i class="fa-regular fa-comment-dots d-block mx-auto mb-1" style="font-size: 20px;"></i>
-                            Feedback
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://cresht2606.github.io/" target="_blank" class="nav-link text-white">
+                        <a href="/about.html" class="nav-link text-white">
                             <i class="fa-regular fa-address-card d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             About
                         </a>
@@ -48,48 +45,130 @@
             </div>
         </div>
     </header>
-    
-    <!-- FEEDBACK FORM -->
-    <section class="feedback-container">
-        <h2>Feedback Form</h2>
-        <form id="feedbackForm">
-            <label for="fullname">Full Name:</label>
-            <input type="text" id="fullname" required />
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" required />
+    <!-- PAGE TITLE -->
+    <div class="page-title-wrap">
+        <span class="page-title">📬 Feedback System</span>
+    </div>
 
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" />
+    <!-- MAIN PANEL -->
+    <main class="container my-4">
+        <section class="panel main-panel">
 
-            <label for="problemType">Problem Type:</label>
-            <select id="problemType">
-                <option value="website">Website Functionality</option>
-                <option value="sample_test">Sample Test</option>
-            </select>
+            <form id="feedbackForm" novalidate>
 
-            <div id="sample-test-selector" style="display:none;">
-                <label for="testSelector">Select the Test:</label>
-                <select id="testSelector"></select>
-            </div>
+                <!-- USER INFORMATION -->
+                <fieldset class="mb-3">
+                    <legend class="h6">User Information</legend>
 
-            <label>Rating:</label>
-            <div class="rating-stars" id="ratingStars"></div>
+                    <div class="mb-2">
+                        <label for="fullname" class="form-label">Full Name</label>
+                        <input type="text" id="fullname" name="fullname" class="form-control" required>
+                    </div>
 
-            <label for="description">Additional Feedback:</label>
-            <textarea id="description" rows="4" cols="40" placeholder="Describe the issue or feedback"></textarea>
+                    <div class="mb-2">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
 
-            <button type="reset">Reset</button>
-            <button type="submit">Submit</button>
-        </form>
+                    <div class="mb-2">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" class="form-control" required>
+                    </div>
+                </fieldset>
 
-        <p id="feedback-status"></p>
-    </section>
+                <!-- PROBLEM TYPE -->
+                <fieldset class="mb-3">
+                    <legend class="h6">Problem Type</legend>
+
+                    <select id="problemType" name="problemType" class="form-select" required>
+                        <option value="" disabled selected hidden>Select a category</option>
+                        <option value="sample_test">Sample Tests</option>
+                        <option value="website">Website Functionality</option>
+                    </select>
+                </fieldset>
+
+                <!-- SAMPLE TEST FILTER PLACEHOLDER -->
+                <fieldset id="sampleTestSection" class="mb-3 d-none">
+                    <legend class="h6">Locate Sample Test</legend>
+
+                    <p class="small text-muted">
+                        Filters below mirror the Sample Test Archiver main page.
+                    </p>
+
+                    <!-- SUBJECT SEARCH INPUT -->
+                    <div class="mb-2 position-relative">
+                        <input type="text" id="searchInput" class="form-control form-control-sm rounded-pill"
+                            placeholder="Search subject..." aria-label="Search subject">
+                        <div id="searchSuggestions" class="list-group position-absolute w-100" style="z-index: 1000;">
+                        </div>
+                    </div>
+
+                    <div class="filters d-flex gap-2 flex-wrap">
+                        <select class="form-select form-select-sm rounded-pill" id="fbUniversity">
+                            <option value="" disabled selected hidden>University</option>
+                        </select>
+
+                        <select class="form-select form-select-sm rounded-pill" id="fbYear">
+                            <option value="" disabled selected hidden>Year</option>
+                        </select>
+
+                        <select class="form-select form-select-sm rounded-pill" id="fbSemester">
+                            <option value="" disabled selected hidden>Semester</option>
+                        </select>
+
+                        <select class="form-select form-select-sm rounded-pill" id="fbType">
+                            <option value="" disabled selected hidden>Type</option>
+                        </select>
+                    </div>
+
+                    <!-- Selected Test Output -->
+                    <div class="mt-2 small text-muted">
+                        Selected Test ID will be stored internally.
+                    </div>
+                </fieldset>
+
+                <!-- RATING -->
+                <fieldset class="mb-3" id="ratingSection">
+                    <legend class="h6">Rating</legend>
+
+                    <div class="rating-stars justify-content-start">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <div class="mt-1 small text-muted" id="ratingOutput">Rating is: 0 / 5</div>
+
+                    <small class="text-muted">
+                        Ratings contribute to average scores displayed on the main page.
+                    </small>
+                </fieldset>
+
+                <!-- ADDITIONAL FEEDBACK -->
+                <fieldset class="mb-3">
+                    <legend class="h6">Additional Feedback</legend>
+
+                    <textarea id="description" name="description" class="form-control" rows="4"
+                        placeholder="Describe the issue or suggestion..." required></textarea>
+                </fieldset>
+
+                <!-- ACTIONS -->
+                <div class="d-flex justify-content-end gap-2">
+                    <input type="reset" class="btn btn-outline-secondary btn-sm" value="Reset">
+                    <input type="submit" class="btn btn-danger btn-sm" value="Submit">
+                </div>
+
+            </form>
+
+        </section>
+    </main>
 
     <!-- FOOTER -->
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
         <div class="col-md-4 d-flex align-items-center">
-            <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Cresht, Inc</span>
+            <span class="mb-3 mb-md-0 text-body-secondary">© 2025 STA, Inc</span>
         </div>
         <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
             <li class="ms-3">
@@ -101,9 +180,12 @@
         </ul>
     </footer>
 
+    <!-- SCRIPT -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/713e56cd45.js" crossorigin="anonymous"></script>
     <script type="module" src="assets/js/main.js"></script>
+    <script src="assets/js/feedback.js"></script>
+
 
 </body>
 

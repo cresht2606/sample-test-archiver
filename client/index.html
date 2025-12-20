@@ -6,6 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link href="assets/styles/main.css" rel="stylesheet" />
+    <link href="assets/styles/feedback.css" rel="stylesheet" />
+    <link href="assets/styles/changelog.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <title> Sample Test Archiver </title>
 
@@ -31,13 +33,13 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#fbModal">
+                        <a href="/feedback.html" class="nav-link text-white">
                             <i class="fa-regular fa-comment-dots d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             Feedback
                         </a>
                     </li>
                     <li>
-                        <a href="https://cresht2606.github.io/" target="_blank" class="nav-link text-white">
+                        <a href="/about.html" class="nav-link text-white">
                             <i class="fa-regular fa-address-card d-block mx-auto mb-1" style="font-size: 20px;"></i>
                             About
                         </a>
@@ -80,6 +82,26 @@
                 <div id="embedWrap" class="mb-3 text-center" aria-live="polite">
                 </div>
 
+                <!-- AVERAGE RATING DISPLAY -->
+                <div id="avgRatingWrap" class="mb-3 text-center d-none">
+
+                    <h6 class="mb-1">Average Rating</h6>
+
+                    <div class="rating-stars justify-content-center" id="avgStars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                    </div>
+
+                    <div class="small text-muted mt-1">
+                        <span id="avgRatingValue">0.00</span> / 5
+                        (<span id="totalReviews">0</span> reviews)
+                    </div>
+
+                </div>
+
                 <!-- ACTIONS: VIEWS + FAVOURITES -->
                 <div class="action-row d-flex justify-content-center gap-2 align-items-center mb-3">
                     <button id="viewsBtn" class="btn btn-danger btn-sm">
@@ -107,7 +129,7 @@
     <!-- FOOTER -->
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
         <div class="col-md-4 d-flex align-items-center">
-            <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Cresht, Inc</span>
+            <span class="mb-3 mb-md-0 text-body-secondary">© 2025 STA, Inc</span>
         </div>
         <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
             <li class="ms-3">
@@ -122,26 +144,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/713e56cd45.js" crossorigin="anonymous"></script>
     <script type="module" src="assets/js/main.js"></script>
+    <script src="assets/js/feedback.js"></script>
 
-    <!-- FEEDBACK MODAL -->
-    <div class="modal fade" id="fbModal" tabindex="-1" aria-labelledby="fdModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="fdModalLabel">📬 Constructive Criticism Box</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Any suggestions or ideas (rarely considered but occasionally attempted) can go here.</p>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-secondary" href="#" target="_blank" rel="noopener noreferrer">
-                        Click Here
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>
