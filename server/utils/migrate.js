@@ -16,7 +16,7 @@ async function runMigrations() {
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(255) NOT NULL UNIQUE,
       run_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+    ) ENGINE=InnoDB
   `);
 
   const migrationsDir = path.join(__dirname, "../../migrations");
@@ -46,7 +46,16 @@ async function runMigrations() {
       .filter(Boolean);
 
     for (const stmt of statements) {
-      await connection.query(stmt);
+      try {
+        await connection.query(stmt);
+      } catch (err) {
+        // Ignore duplicate index errors (MySQL 5.7 safe)
+        if (err.code === "ER_DUP_KEYNAME") {
+          console.log(`↷ Index already exists, skipping`);
+          continue;
+        }
+        throw err;
+      }
     }
 
     await connection.query(
