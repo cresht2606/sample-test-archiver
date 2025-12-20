@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "migrate": "mysql -h $MYSQLHOST -u $MYSQLUSER -p$MYSQLPASSWORD $MYSQLDATABASE < migrations/001_init.sql",
+    "migrate": "node server/utils/migrate.js",
     "start": "npm run migrate && node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
