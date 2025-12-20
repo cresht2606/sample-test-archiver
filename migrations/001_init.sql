@@ -1,23 +1,15 @@
--- ===============================
--- GLOBAL SETTINGS (Railway-safe)
--- ===============================
-SET NAMES utf8mb4;
-SET time_zone = '+00:00';
+-- =========================
+-- Core Tables
+-- =========================
 
--- ===============================
--- SUBJECTS
--- ===============================
-CREATE TABLE IF NOT EXISTS subjects (
+CREATE TABLE subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- TESTS
--- ===============================
-CREATE TABLE IF NOT EXISTS tests (
+CREATE TABLE tests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     subject_id INT NOT NULL,
     university VARCHAR(100) NOT NULL,
@@ -25,35 +17,37 @@ CREATE TABLE IF NOT EXISTS tests (
     semester VARCHAR(50) NOT NULL,
     type VARCHAR(50) NOT NULL,
     drive_embed_url TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     views INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_tests_subject
         FOREIGN KEY (subject_id)
         REFERENCES subjects(id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- CHANGELOG
--- ===============================
-CREATE TABLE IF NOT EXISTS changelog (
+-- =========================
+-- Changelog
+-- =========================
+
+CREATE TABLE changelog (
     id INT AUTO_INCREMENT PRIMARY KEY,
     version VARCHAR(50) NOT NULL,
     date DATE,
     body TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- FEEDBACK
--- ===============================
-CREATE TABLE IF NOT EXISTS feedback (
+-- =========================
+-- Feedback
+-- =========================
+
+CREATE TABLE feedback (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_fullname VARCHAR(120),
     email VARCHAR(120),
     dob DATE,
-    problem_type ENUM('website', 'sample_test'),
+    problem_type ENUM('website', 'sample_test') NOT NULL,
     test_id INT NULL,
     rating INT,
     description TEXT,
@@ -63,12 +57,13 @@ CREATE TABLE IF NOT EXISTS feedback (
         FOREIGN KEY (test_id)
         REFERENCES tests(id)
         ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- TEST RATINGS
--- ===============================
-CREATE TABLE IF NOT EXISTS test_ratings (
+-- =========================
+-- Test Ratings
+-- =========================
+
+CREATE TABLE test_ratings (
     test_id INT PRIMARY KEY,
     avg_rating DECIMAL(3,2) DEFAULT 0,
     total_reviews INT DEFAULT 0,
@@ -77,12 +72,13 @@ CREATE TABLE IF NOT EXISTS test_ratings (
         FOREIGN KEY (test_id)
         REFERENCES tests(id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- FEEDBACK EXPORT QUEUE
--- ===============================
-CREATE TABLE IF NOT EXISTS feedback_export_queue (
+-- =========================
+-- Feedback Export Queue
+-- =========================
+
+CREATE TABLE feedback_export_queue (
     id INT AUTO_INCREMENT PRIMARY KEY,
     feedback_id INT NOT NULL,
     exported BOOLEAN DEFAULT FALSE,
@@ -91,11 +87,12 @@ CREATE TABLE IF NOT EXISTS feedback_export_queue (
         FOREIGN KEY (feedback_id)
         REFERENCES feedback(id)
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ===============================
--- INDEXES
--- ===============================
+-- =========================
+-- Indexes
+-- =========================
+
 CREATE INDEX idx_tests_subject ON tests (subject_id);
 CREATE INDEX idx_tests_filters ON tests (year, semester, type, university);
 
@@ -109,33 +106,90 @@ CREATE INDEX idx_export_queue_feedback_id ON feedback_export_queue (feedback_id)
 
 CREATE INDEX idx_test_ratings_avg ON test_ratings (avg_rating);
 
--- ===============================
--- SEED DATA (IDEMPOTENT)
--- ===============================
+-- =========================
+-- Seed Data
+-- =========================
+
 INSERT IGNORE INTO subjects (code, name) VALUES
 ('MATH101', 'Calculus I'),
-('PHYS201', 'Physics II'),
-('CS105', 'Introduction to Programming');
+('MATH102', 'Calculus II'),
+('MATH201', 'Discrete Mathematics'),
+('STAT201', 'Probability'),
+('MATH202', 'Linear Algebra'),
+('MATH203', 'Applied Linear Algebra');
 
-INSERT IGNORE INTO tests
-(subject_id, university, year, semester, type, drive_embed_url)
-VALUES
-(1, 'MIT', 2024, 'Fall', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(1, 'MIT', 2024, 'Fall', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(1, 'Harvard', 2024, 'Spring', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(1, 'Harvard', 2024, 'Spring', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
+INSERT INTO tests (
+    subject_id,
+    university,
+    year,
+    semester,
+    type,
+    drive_embed_url
+) VALUES
+-- =====================
+-- Calculus I (id = 1)
+-- =====================
+(1, 'HCMIU', 2024, 'Final-term', 'Final',
+ 'https://drive.google.com/file/d/1J4g4kbHky13JjfYBDls1xBEJNIia52Fr/preview'),
+(1, 'HCMIU', 0, 'Final-term', 'Final',
+ 'https://drive.google.com/file/d/1LqUUpxjwSKU-_guTto7Y4wK4PlyLUDVy/preview'),
+(1, 'HCMUS', 2024, 'Final-term', 'Final',
+ 'https://drive.google.com/file/d/1cViBVselThuQj5E5kHWf41eQh_CR_duG/preview'),
 
-(2, 'MIT', 2023, 'Fall', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(2, 'MIT', 2023, 'Fall', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(2, 'Stanford', 2023, 'Spring', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(2, 'Stanford', 2023, 'Spring', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
+-- =====================
+-- Calculus II (id = 2)
+-- =====================
+(2, 'HCMIU', 2021, 'Semester 2', 'Midterm',
+ 'https://drive.google.com/file/d/1rwjW6v7nubAYUUImLpZf1zlt0KPGjHYo/preview'),
+(2, 'HCMIU', 2021, 'Semester 3', 'Midterm',
+ 'https://drive.google.com/file/d/1fk-LTetINpoV8YiGiIwvc5yJITAzRHXy/preview'),
+(2, 'HCMIU', 2021, 'Semester 2 (G3 & 4)', 'Final',
+ 'https://drive.google.com/file/d/1IYXeByVO0IOJByNHuCHFzcPJ_-ix2MIa/preview'),
+(2, 'HCMIU', 2021, 'Semester 2 (G5 & 6)', 'Final',
+ 'https://drive.google.com/file/d/1-fXdlVToQWDbBa4YAlXag0Z1UXJff5--/preview'),
+(2, 'HCMIU', 2023, 'Semester 2', 'Final',
+ 'https://drive.google.com/file/d/10E-Z_Mqn-ROdot9pqSn-rF-qfqwhnalQ/preview'),
+(2, 'HCMUS', 2024, 'Semester 2', 'Midterm',
+ 'https://drive.google.com/file/d/1OsVyr5r0wIpYOGR4z7dzt1IToLpufGGL/preview'),
 
-(3, 'Harvard', 2024, 'Fall', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(3, 'Harvard', 2024, 'Fall', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(3, 'MIT', 2024, 'Spring', 'Midterm', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view'),
-(3, 'MIT', 2024, 'Spring', 'Final', 'https://drive.google.com/file/d/1S9JsVG5XHT7fPvQVFSsc__5xbwXNNH_C/view');
+-- =====================
+-- Discrete Mathematics (id = 3)
+-- =====================
+(3, 'HCMUS', 2024, 'Semester 1', 'Midterm',
+ 'https://drive.google.com/file/d/1_T4HoYrWXNbt6RK0tbHk499KscemhdeK/preview'),
+(3, 'HCMUS', 2024, 'Semester 1', 'Final',
+ 'https://drive.google.com/file/d/1eMqLomI-vHbznUOlWk82qezRvXHlnAvT/preview'),
 
-INSERT IGNORE INTO changelog (version, date, body) VALUES
-('1.3.8', '2020-06-04', 'Updated Bootstrap, jQuery, RTL, Dark mode'),
-('1.3.0', '2020-05-28', 'Material Icons update, RTL, Dark variants'),
-('1.0.0', '2020-03-04', 'Initial Release');
+-- =====================
+-- Probability (id = 4)
+-- =====================
+(4, 'HCMIU', 2021, 'Semester 1', 'Midterm',
+ 'https://drive.google.com/file/d/1yK1j_bfj5mYQlA3zWq7sn_vETBfFIZq8/preview'),
+(4, 'HCMIU', 2021, 'Semester 2', 'Final',
+ 'https://drive.google.com/file/d/1udayT5PH-aEU4ZMcKgwcEyz4wsxBPbPa/preview'),
+(4, 'HCMIU', 2024, 'Semester 2', 'Final',
+ 'https://drive.google.com/file/d/1OcvEvJH0m5phDDADIrGjYSopouWjnpNN/preview'),
+(4, 'HCMUS', 2024, 'Semester 2', 'Midterm',
+ 'https://drive.google.com/file/d/1fXWPewcJnKiYPOxEEbm-0I4XMXMNxV1X/preview'),
+(4, 'HCMUS', 2024, 'Semester 1', 'Final',
+ 'https://drive.google.com/file/d/1e-54OScTr9zpaeLRfv62hUQQUQfG57pZ/preview'),
+
+-- =====================
+-- Linear Algebra (id = 5)
+-- =====================
+(5, 'HCMIU', 2023, 'Semester 3', 'Midterm',
+ 'https://drive.google.com/file/d/1ox24O8KgdFQ7cZeyuA5yVrxQeUaNugWv/preview'),
+(5, 'HCMIU', 0, 'Unknown Semester', 'Final',
+ 'https://drive.google.com/file/d/1Sf9ce__w1Ax46sPptzfP2Zup9b77ruJP/preview'),
+(5, 'HCMUS', 2024, 'Semester 1', 'Midterm',
+ 'https://drive.google.com/file/d/1yx_JtQtkKJXkFKd3oOsKOporp1YxqNnE/preview'),
+(5, 'HCMUS', 2022, 'Semester 1', 'Final',
+ 'https://drive.google.com/file/d/1UMYQoOfAH9P8WYE3LbYbVYs4FPtFoGZO/preview'),
+
+-- =====================
+-- Applied Linear Algebra (id = 6)
+-- =====================
+(6, 'HCMUS', 2023, 'Semester 2', 'Midterm',
+ 'https://drive.google.com/file/d/1qeNRyIcDIxE6t0mVHPKsC_IpzRlOkwT5/preview'),
+(6, 'HCMUS', 2023, 'Semester 2', 'Final',
+ 'https://drive.google.com/file/d/1JCIu5S7n0gUKZwqBe5yajq1JalBGvU50/preview');
