@@ -121,7 +121,7 @@ body > main {
 
 /* Button row spacing (fixed selector) */
 .action-row {
-    margin-top: 7rem;
+    margin-top: 3rem;
 }
 
 /* EMBED PLACEHOLDER */
@@ -169,6 +169,45 @@ body > main {
     border-radius: 8px;
     border: 1px solid rgba(0, 0, 0, 0.06);
     margin-bottom: 0.75rem;
+}
+
+/* STAR RATING */
+.star {
+    color: #ccc;
+    /* default grey */
+    position: relative;
+    display: inline-block;
+    font-size: 1.5rem;
+    cursor: default;
+}
+
+.star.full {
+    color: gold;
+}
+
+.star.partial {
+    color: #ccc;
+    position: relative;
+}
+
+.star.partial::before {
+    content: '★';
+    color: gold;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--fill-percent);
+    overflow: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    display: block;
+    /* add this */
+    height: 100%;
+    /* add this */
+}
+
+.star.empty {
+    color: #ccc;
 }
 
 /* FOOTER */

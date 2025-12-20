@@ -44,26 +44,20 @@ export function shouldIncreaseView(testId) {
     return !hasViewedThisSession(testId);
 };
 
-export function incrementView(testId, viewsCountSpan) {
-    if (!hasViewedThisSession(testId)) {
-        markViewedThisSession(testId);
+export async function incrementView(testId, viewsCountSpan) {
+    try {
+        const res = await fetch(`/api/tests/${testId}/view`, {
+            method: 'POST'
+        });
 
-        // Increment localStorage counter for UI
-        let views = JSON.parse(localStorage.getItem('testViews') || '{}');
-        views[testId] = (views[testId] || 0) + 1;
-        localStorage.setItem('testViews', JSON.stringify(views));
+        if (!res.ok) throw new Error("View update failed");
+
+        const data = await res.json();
 
         if (viewsCountSpan) {
-            viewsCountSpan.textContent = views[testId];
+            viewsCountSpan.textContent = data.views;
         }
-
-        // Correct POST URL
-        fetch(`/api/tests/view/${testId}`, { method: 'POST' })
-            .catch(err => console.error('Failed to update view in DB:', err));
-    } 
-    else {
-        // Already viewed in this session — just update UI from localStorage
-        let views = JSON.parse(localStorage.getItem('testViews') || '{}');
-        if (viewsCountSpan) viewsCountSpan.textContent = views[testId] || 0;
+    } catch (err) {
+        console.error("View tracking error:", err);
     }
 }

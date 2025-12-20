@@ -24,9 +24,16 @@ const favBtn = document.getElementById('favBtn');
 const favList = document.getElementById('favList');
 const viewsCountSpan = document.getElementById('viewsCount');
 
+const avgRatingWrap = document.getElementById("avgRatingWrap");
+const avgStars = document.querySelectorAll("#avgStars .star");
+const avgRatingValue = document.getElementById("avgRatingValue");
+const totalReviews = document.getElementById("totalReviews");
+
 let selectedSubjectId = null;
 let selectedTest = null;
 let favourites = getFavourites(); // Favourite storage
+
+let lastViewedTestId = null;
 
 function updateFavButton() {
     if (!selectedTest) {
@@ -82,7 +89,7 @@ async function renderFavourites() {
 
             div.innerHTML = `
                 <b>${title}</b><br>
-                <small>${test.university} — ${test.year} Semester ${test.semester}</small>
+                <small>${test.university} — ${test.year} Semester ${test.semester} (${test.type})</small>
                 <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
                     Remove
                 </button>
@@ -280,21 +287,32 @@ document.addEventListener('click', (e) => {
 });
 
 // ---------- Load Test Viewer ----------
-function loadTest(test) {
+async function loadTest(test) {
     selectedTest = test;
-    // Session-aware view tracking
-    incrementView(test.id, viewsCountSpan);
-    //--- load Drive Viewer---
+
+    if (lastViewedTestId !== test.id) {
+        incrementView(test.id, viewsCountSpan);
+        lastViewedTestId = test.id;
+    }
+
+    // --- Load Drive Viewer---
     embedWrap.innerHTML = `
     <div class="embed-responsive">
       <iframe src="${test.drive_embed_url}" width="640" height="480" allowfullscreen></iframe>
     </div>`;
+
+    // --- Load average rating for this test ---
+    await loadAvgRating(test.id);
+
+    // --- Update favourite button ---
+    updateFavButton();
 }
 
 // Reset filters and viewer
 function resetFiltersAndViewer() {
     selectedSubjectId = null;
     selectedTest = null;
+    lastViewedTestId = null;
 
     // Reset dropdowns
     selUniversity.innerHTML = `<option value="" disabled hidden selected>University</option>`;
@@ -309,4 +327,67 @@ function resetFiltersAndViewer() {
 
     // Clear Google Drive frame
     embedWrap.innerHTML = "";
+
+    // Clear view tracking (sessionStorage)
+    sessionStorage.removeItem('viewedTests');
+
+    // Reset views count UI to 0
+    if (viewsCountSpan) {
+        viewsCountSpan.textContent = "0";
+    }
+
+    // Reset favourites UI and button
+    renderFavourites();
+    updateFavButton();
+
+    localStorage.removeItem("testViews");
+
+    // Hide average rating
+    avgRatingWrap.classList.add("d-none");
+}
+
+function renderAvgRating(avg) {
+    console.log("Rendering stars for avg:", avg);
+    avgStars.forEach((star, i) => {
+        star.className = 'star'; // reset all stars
+
+        if (avg >= i + 1) {
+            star.classList.add('full');
+            star.style.removeProperty('--fill-percent');
+        } else if (avg > i && avg < i + 1) {
+            star.classList.add('partial');
+            star.style.setProperty('--fill-percent', `${(avg - i) * 100}%`);
+        } else {
+            star.classList.add('empty');
+            star.style.removeProperty('--fill-percent');
+        }
+
+        // Make stars unclickable and non-interactive
+        star.style.pointerEvents = 'none'; // Disable click events on stars
+        star.style.cursor = 'default'; // Make cursor default (not a pointer)
+    });
+}
+
+async function loadAvgRating(testId) {
+    try {
+        const res = await fetch(`/api/tests/${testId}/rating`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        // Update numeric rating
+        avgRatingValue.textContent = Number(data.avg_rating).toFixed(2);
+        totalReviews.textContent = data.total_reviews;
+
+        // Update stars
+        renderAvgRating(data.avg_rating);
+
+        // Show rating container
+        avgRatingWrap.classList.remove("d-none");
+
+    } catch (err) {
+        console.error("Failed to load avg rating:", err);
+        // hide if fetch fails
+        avgRatingWrap.classList.add("d-none");
+    }
 }
