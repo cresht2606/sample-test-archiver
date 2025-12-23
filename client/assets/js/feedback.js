@@ -195,9 +195,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const li = document.createElement("li");
                     li.className = "list-group-item list-group-item-action";
                     li.style.cursor = "pointer";
-                    li.textContent = sub.title;
+                    li.textContent = sub.name;
                     li.addEventListener("click", () => {
-                        if (searchInput) searchInput.value = sub.title;
+                        if (searchInput) searchInput.value = sub.name;
                         selectedKeywordId = sub.id;
                         if (searchSuggestions) searchSuggestions.innerHTML = "";
                         loadFiltersForSubject(sub.id);
