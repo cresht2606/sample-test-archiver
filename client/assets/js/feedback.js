@@ -77,18 +77,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function populateSelect(selectEl, items) {
         if (!selectEl) return;
+
         const placeholderText = selectEl.options[0]?.text || "Select";
         selectEl.innerHTML = `<option value="" disabled selected hidden>${placeholderText}</option>`;
+
         if (!items || items.length === 0) {
             selectEl.disabled = true;
             return;
         }
+
         items.forEach(item => {
             const option = document.createElement("option");
-            option.value = item.id || item.name || item;
-            option.textContent = (item.name || item.id || item).toString().replace(/\b\w/g, char => char.toUpperCase()); // Capitalizing the first letter of each word
+
+            // Always convert value to string
+            if (typeof item === "object" && item !== null) {
+                option.value = String(item.id ?? item.name ?? "");
+                option.textContent = String(item.name ?? item.id ?? "").replace(/\b\w/g, c => c.toUpperCase());
+            } else {
+                option.value = String(item);
+                option.textContent = String(item).replace(/\b\w/g, c => c.toUpperCase());
+            }
+
             selectEl.appendChild(option);
         });
+
         selectEl.disabled = false;
     }
 
@@ -97,7 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const params = new URLSearchParams({ subject_id: subjectId });
             if (fbUniversity?.value) params.append("university", fbUniversity.value);
-            if (fbYear?.value) params.append("year", fbYear.value);
+            if (fbYear?.value && !isNaN(Number(fbYear.value))) {
+                params.append("year", fbYear.value);
+            }
             if (fbSemester?.value) params.append("semester", fbSemester.value);
 
             const res = await fetch(`/api/tests/filters?${params.toString()}`);
@@ -125,27 +139,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function resolveTestId() {
-        if (!selectedKeywordId || !fbUniversity?.value || !fbYear?.value || !fbSemester?.value || !fbType?.value) {
-            selectedTestId = null;
-            return;
-        }
+        selectedTestId = null;
+
+        // Ensure required fields are selected
+        if (!selectedKeywordId || !fbUniversity?.value || !fbYear?.value || !fbSemester?.value || !fbType?.value) return;
+
+        // Safely extract primitive values
+        const getValue = (el) => {
+            if (!el) return null;
+            return (typeof el.value === "object" && el.value !== null) ? String(el.value.value ?? el.value.id ?? "") : String(el.value);
+        };
+
         const params = {
             subject_id: selectedKeywordId,
-            university: fbUniversity.value,
-            year: String(fbYear.value),
-            semester: fbSemester.value,
-            type: fbType.value
+            university: getValue(fbUniversity),
+            year: getValue(fbYear),
+            semester: getValue(fbSemester),
+            type: getValue(fbType)
         };
+
+        // Handle unknown year as 0 (or null)
+        if (params.year === "" || params.year.toLowerCase?.() === "unknown") {
+            params.year = 0;
+        }
+
         try {
             const res = await fetch("/api/tests/resolve", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(params)
             });
-            if (!res.ok) { selectedTestId = null; return; }
+
+            if (!res.ok) {
+                selectedTestId = null;
+                return;
+            }
+
             const data = await res.json();
             selectedTestId = data.test_id || null;
-        } catch {
+        } catch (err) {
+            console.error("Error resolving test:", err);
             selectedTestId = null;
         }
     }
