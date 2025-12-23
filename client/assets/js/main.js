@@ -15,10 +15,10 @@ import {
 const input = document.getElementById('searchInput');
 const embedWrap = document.getElementById('embedWrap');
 
+const selUniversity = document.getElementById('selUniversity');
 const selYear = document.getElementById('selYear');
 const selSemester = document.getElementById('selSemester');
 const selType = document.getElementById('selType');
-const selUniversity = document.getElementById('selUniversity');
 
 const favBtn = document.getElementById('favBtn');
 const favList = document.getElementById('favList');
@@ -29,6 +29,7 @@ const avgStars = document.querySelectorAll("#avgStars .star");
 const avgRatingValue = document.getElementById("avgRatingValue");
 const totalReviews = document.getElementById("totalReviews");
 
+let subjects = []; // cache all subjects on load
 let selectedSubjectId = null;
 let selectedTest = null;
 let favourites = getFavourites(); // Favourite storage
@@ -36,17 +37,12 @@ let favourites = getFavourites(); // Favourite storage
 let lastViewedTestId = null;
 
 function updateFavButton() {
-    if (!selectedTest) {
-        favBtn.textContent = "☆ Add to favourite";
-        return;
-    }
-    if (isFavourite(selectedTest.id)) {
-        favBtn.textContent = "★ Favourited";
-    }
-    else {
-        favBtn.textContent = "☆ Add to favourite";
-    }
+    if (!favBtn) return;
+    favBtn.textContent = selectedTest && isFavourite(selectedTest.id)
+        ? "★ Favourited"
+        : "☆ Add to favourite";
 }
+
 // ---------- Favourites Placeholder ----------
 function renderFavouritesPlaceholder() {
     if (favList) {
@@ -56,12 +52,10 @@ function renderFavouritesPlaceholder() {
 renderFavouritesPlaceholder();
 
 //Render Favourites Panel
-let subjects = []; // cache all subjects on load
 
 // Fetch all subjects at start
 window.addEventListener("DOMContentLoaded", async () => {
-    subjects = await fetch('/api/subjects/all').then(r => r.json());
-    showAutocomplete(subjects);
+    subjects = await fetch("/api/subjects/all").then(r => r.json());
     renderFavourites();
     updateFavButton();
 });
@@ -69,10 +63,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 async function renderFavourites() {
     if (!favList) return;
 
-    favourites = getFavourites(); // refresh
+    favourites = getFavourites();
 
-    if (favourites.length === 0) {
-        favList.innerHTML = '<small class="text-muted">No favourites yet</small>';
+    if (!favourites.length) {
+        favList.innerHTML = `<small class="text-muted">No favourites yet</small>`;
         return;
     }
 
@@ -82,53 +76,37 @@ async function renderFavourites() {
         try {
             const test = await fetchTestById(id);
             const subject = subjects.find(s => s.id === test.subject_id);
-            const title = subject ? subject.title : "Unknown Subject";
 
-            const div = document.createElement('div');
-            div.className = 'fav-item mb-2 p-2 border rounded';
-
+            const div = document.createElement("div");
+            div.className = "fav-item p-2 border rounded mb-2";
             div.innerHTML = `
-                <b>${title}</b><br>
-                <small>${test.university} — ${test.year} Semester ${test.semester} (${test.type})</small>
-                <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">
-                    Remove
-                </button>
-            `;
+        <b>${subject?.name ?? "Unknown Subject"}</b><br>
+        <small>${test.university} — ${test.year ?? "N/A"} ${test.semester} (${test.type})</small>
+        <button class="btn btn-sm btn-outline-danger float-end remove-fav" data-id="${id}">Remove</button>
+      `;
 
             div.addEventListener("click", () => loadTest(test));
             favList.appendChild(div);
 
-        } catch (e) {
-            console.error("Failed to fetch favourite test", id, e);
+            div.querySelector(".remove-fav").addEventListener("click", e => {
+                e.stopPropagation();
+                toggleFavourite(id);
+                renderFavourites();
+                updateFavButton();
+            });
+
+        } catch (err) {
+            console.error("Favourite load failed:", err);
         }
     }
-
-    document.querySelectorAll(".remove-fav").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-
-            const testId = Number(btn.dataset.id);
-            favourites = toggleFavourite(testId);  // <— UTIL
-
-            renderFavourites();
-            updateFavButton();
-        });
-    });
 }
 
-if (favBtn) {
-    favBtn.addEventListener('click', () => {
-        if (!selectedTest) {
-            alert("Select a test first!");
-            return;
-        }
-
-        favourites = toggleFavourite(selectedTest.id); // Call from utils.js
-
-        updateFavButton();
-        renderFavourites();
-    });
-}
+favBtn?.addEventListener("click", () => {
+    if (!selectedTest) return alert("Select a test first");
+    toggleFavourite(selectedTest.id);
+    renderFavourites();
+    updateFavButton();
+});
 
 // ---------- Autocomplete ----------
 let acTimer = null;
@@ -168,16 +146,20 @@ function showAutocomplete(items = []) {
         const el = document.createElement('button');
         el.type = 'button';
         el.className = 'list-group-item list-group-item-action';
-        el.textContent = it.title;
+        el.textContent = it.name;
 
         el.addEventListener('click', async () => {
-            input.value = it.title;
+            input.value = it.name;
             selectedSubjectId = it.id;
             closeAutocomplete();
 
             // Fetch filters for this subject
-            const filters = await fetchSubjectFilters(selectedSubjectId);
-            populateDropdowns(filters);
+            try {
+                const filters = await fetchSubjectFilters(selectedSubjectId);
+                populateDropdowns(filters);
+            } catch {
+                resetFiltersAndViewer();
+            }
         });
 
         list.appendChild(el);
@@ -217,7 +199,7 @@ selUniversity.addEventListener('change', () => {
     const filters = JSON.parse(selUniversity.dataset.filters);
     const university = selUniversity.value;
 
-    const years = [...new Set(filters.filter(f => f.university === university).map(f => f.year))].sort();
+    const years = [...new Set(filters.filter(f => f.university === university && f.year !== null).map(f => f.year))].sort();
     selYear.innerHTML = `<option value="" disabled hidden selected>Year</option>`;
     years.forEach(y => selYear.appendChild(new Option(y, y)));
 
@@ -339,8 +321,6 @@ function resetFiltersAndViewer() {
     // Reset favourites UI and button
     renderFavourites();
     updateFavButton();
-
-    localStorage.removeItem("testViews");
 
     // Hide average rating
     avgRatingWrap.classList.add("d-none");
