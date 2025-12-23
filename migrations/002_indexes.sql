@@ -4,7 +4,7 @@
 
 CREATE INDEX idx_tests_subject ON tests (subject_id);
 
-CREATE INDEX idx_tests_filters ON tests (year, semester, type, university);
+CREATE INDEX idx_tests_filters ON tests (university, year, semester, type);
 
 CREATE INDEX idx_feedback_test_id ON feedback (test_id);
 
