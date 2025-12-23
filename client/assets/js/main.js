@@ -56,6 +56,10 @@ renderFavouritesPlaceholder();
 // Fetch all subjects at start
 window.addEventListener("DOMContentLoaded", async () => {
     subjects = await fetch("/api/subjects/all").then(r => r.json());
+
+    // Show all subjects
+    showAutocomplete(subjects);
+    
     renderFavourites();
     updateFavButton();
 });
@@ -370,4 +374,5 @@ async function loadAvgRating(testId) {
         // hide if fetch fails
         avgRatingWrap.classList.add("d-none");
     }
+
 }
