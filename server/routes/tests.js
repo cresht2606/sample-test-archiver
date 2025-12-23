@@ -58,97 +58,91 @@ router.get('/', async (req, res) => {
 router.get("/filters", async (req, res) => {
     const { subject_id, university, year, semester } = req.query;
 
-    if (!subject_id) {
-        return res.status(400).json({ error: "subject_id is required" });
-    }
+    if (!subject_id) return res.status(400).json({ error: "subject_id required" });
 
     try {
-        // Helper: safely parse year
-        const yearNum = year ? parseInt(year, 10) : null;
-
-        // Base WHERE clause for subject
-        const baseWhere = 'WHERE subject_id = ?';
-        const baseParams = [subject_id];
-
-        // Filtered WHERE clause (for types, semesters, etc.)
-        let filteredWhere = baseWhere;
-        const filteredParams = [...baseParams];
-
-        if (university) {
-            filteredWhere += ` AND LOWER(TRIM(university)) = LOWER(TRIM(?))`;
-            filteredParams.push(university);
-        }
-
-        if (yearNum !== null && !isNaN(yearNum)) {
-            filteredWhere += ` AND CAST(year AS UNSIGNED) = ?`;
-            filteredParams.push(yearNum);
-        }
-
-        if (semester) {
-            filteredWhere += ` AND LOWER(TRIM(semester)) = LOWER(TRIM(?))`;
-            filteredParams.push(semester);
-        }
-
-        // === Fetch filter data ===
-
-        // Universities (always available for subject)
+        // ---------------------
+        // Universities: independent
+        // ---------------------
         const [universities] = await pool.query(
-            `SELECT DISTINCT LOWER(TRIM(university)) AS name, university AS id
+            `SELECT DISTINCT university
              FROM tests
-             ${baseWhere}
+             WHERE subject_id = ?
              ORDER BY university`,
-            baseParams
+            [subject_id]
         );
 
-        // Years (always available for subject)
-        const [years] = await pool.query(
-            `SELECT DISTINCT year AS name, year AS id
-             FROM tests
-             ${baseWhere}
-             ORDER BY year DESC`,
-            baseParams
-        );
-
-        // Semesters (filtered by university and year if provided)
-        let semesterWhere = baseWhere;
-        const semesterParams = [...baseParams];
-
+        // ---------------------
+        // Years: dependent on university (if selected)
+        // ---------------------
+        let yearWhere = "WHERE subject_id = ?";
+        const yearParams = [subject_id];
         if (university) {
-            semesterWhere += ` AND LOWER(TRIM(university)) = LOWER(TRIM(?))`;
-            semesterParams.push(university);
+            yearWhere += " AND university = ?";
+            yearParams.push(university);
         }
-        if (yearNum !== null && !isNaN(yearNum)) {
-            semesterWhere += ` AND CAST(year AS UNSIGNED) = ?`;
-            semesterParams.push(yearNum);
+
+        const [years] = await pool.query(
+            `SELECT DISTINCT year
+             FROM tests
+             ${yearWhere}
+             ORDER BY year DESC`,
+            yearParams
+        );
+
+        // ---------------------
+        // Semesters: dependent on university + year
+        // ---------------------
+        let semWhere = "WHERE subject_id = ?";
+        const semParams = [subject_id];
+        if (university) { semWhere += " AND university = ?"; semParams.push(university); }
+        if (year) {
+            if (Number(year) === 0) {
+                semWhere += " AND year = 0"; // unknown year
+            } else {
+                semWhere += " AND year = ?";
+                semParams.push(Number(year));
+            }
         }
 
         const [semesters] = await pool.query(
-            `SELECT DISTINCT LOWER(TRIM(semester)) AS name, semester AS id
+            `SELECT DISTINCT semester
              FROM tests
-             ${semesterWhere}
+             ${semWhere}
              ORDER BY semester`,
-            semesterParams
+            semParams
         );
 
-        // Types (filtered by university, year, semester)
+        // ---------------------
+        // Types: dependent on university + year + semester
+        // ---------------------
+        let typeWhere = "WHERE subject_id = ?";
+        const typeParams = [subject_id];
+        if (university) { typeWhere += " AND university = ?"; typeParams.push(university); }
+        if (year) {
+            if (Number(year) === 0) typeWhere += " AND year = 0";
+            else { typeWhere += " AND year = ?"; typeParams.push(Number(year)); }
+        }
+        if (semester) { typeWhere += " AND semester LIKE CONCAT('%', ?, '%')"; typeParams.push(semester); }
+
         const [types] = await pool.query(
-            `SELECT DISTINCT LOWER(TRIM(type)) AS name, type AS id
+            `SELECT DISTINCT type
              FROM tests
-             ${filteredWhere}
+             ${typeWhere}
              ORDER BY type`,
-            filteredParams
+            typeParams
         );
 
         res.json({
-            universities,
-            years,
-            semesters,
-            types
+            universities: universities.map(u => u.university),
+            years: years.map(y => y.year),
+            semesters: semesters.map(s => s.semester),
+            types: types.map(t => t.type),
         });
 
     } catch (err) {
-        console.error("Failed to load filters:", err);
-        res.status(500).json({ error: "Failed to load filters" });
+        console.error("Filter error:", err);
+        res.status(500).json({ error: "Server error" });
     }
 });
 
@@ -157,76 +151,33 @@ router.get("/filters", async (req, res) => {
 router.post("/resolve", async (req, res) => {
     let { subject_id, university, year, semester, type } = req.body;
 
-    console.log("=== RESOLVE DEBUG ===");
-    console.log("Raw request params:", { subject_id, university, year, semester, type });
-
-    // --- Validate required parameters ---
-    if (!subject_id || !university || !year || !semester || !type) {
-        console.warn("❌ Missing required parameters");
+    if (!subject_id || !university || !semester || !type) {
         return res.json({ test_id: null });
     }
 
     // --- Safely parse year ---
-    let yearNum = null;
-    if (typeof year === "object" && year !== null) {
-        // If year is an object (e.g., { value: 2023 }), extract value
-        yearNum = Number(year.value);
-    } else {
-        yearNum = Number(year);
-    }
-
-    if (!Number.isInteger(yearNum)) {
-        console.warn("❌ Invalid year value:", year);
-        return res.json({ test_id: null });
-    }
+    let yearNum = Number(year);
+    if (!Number.isInteger(yearNum) || yearNum < 0) yearNum = 0; // treat unknown as 0
 
     try {
-        // --- Optional: Debug all tests for this subject ---
-        const [allTests] = await pool.query(
-            `SELECT id, subject_id, university, year, semester, type
-             FROM tests
-             WHERE subject_id = ?`,
-            [subject_id]
-        );
-        console.log("All tests for subject_id", subject_id, ":", allTests.length, "records");
-
-        // --- Query to find matching test ---
+        // Match test
         const [rows] = await pool.query(
             `SELECT id
              FROM tests
              WHERE subject_id = ?
                AND LOWER(TRIM(university)) = LOWER(TRIM(?))
-               AND CAST(year AS UNSIGNED) = ?
-               AND LOWER(TRIM(semester)) = LOWER(TRIM(?))
+               AND year = ?
+               AND LOWER(semester) LIKE CONCAT('%', LOWER(TRIM(?)), '%')
                AND LOWER(TRIM(type)) = LOWER(TRIM(?))
              LIMIT 1`,
-            [
-                subject_id,
-                university,
-                yearNum,
-                semester,
-                type
-            ]
+            [subject_id, university, yearNum, semester, type]
         );
 
-        if (!rows || rows.length === 0) {
-            console.warn("⚠️ No matching test found with these criteria");
-            console.log({
-                subject_id,
-                university: university.toLowerCase().trim(),
-                year: yearNum,
-                semester: semester.toLowerCase().trim(),
-                type: type.toLowerCase().trim()
-            });
-            return res.json({ test_id: null });
-        }
+        if (!rows || rows.length === 0) return res.json({ test_id: null });
 
-        const testId = rows[0].id;
-        console.log("✅ Resolved test_id:", testId);
-        res.json({ test_id: testId });
-
+        res.json({ test_id: rows[0].id });
     } catch (err) {
-        console.error("❌ Failed to resolve test ID:", err);
+        console.error("Resolve error:", err);
         res.status(500).json({ error: "Failed to resolve test ID", details: err.message });
     }
 });
