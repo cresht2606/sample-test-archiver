@@ -37,7 +37,7 @@ VALUES (
     (
         1,
         'HCMIU',
-        NULL,
+        0,
         'Final-term',
         'Final',
         'https://drive.google.com/file/d/1LqUUpxjwSKU-_guTto7Y4wK4PlyLUDVy/preview'
@@ -201,4 +201,5 @@ VALUES (
         'Semester 2',
         'Final',
         'https://drive.google.com/file/d/1JCIu5S7n0gUKZwqBe5yajq1JalBGvU50/preview'
+
     );
